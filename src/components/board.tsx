@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
 import { Plus } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
   Dialog,
   DialogContent,
@@ -101,27 +102,32 @@ const Board: React.FC = () => {
   return (
     <div className="h-[90vh] bg-gray-100 p-6">
       <div className="h-full max-w-7xl mx-auto flex flex-col">
-        {/* Header with Add Task Button */}
         <div className="mb-6 flex items-center justify-between">
           <h2 className="text-2xl font-bold text-gray-800">Kanban Board</h2>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="flex items-center gap-2">
+              <Button className="flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">
                 <Plus size={20} /> Add Task
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="bg-white shadow-md rounded-lg p-4">
               <DialogHeader>
                 <DialogTitle>Add New Task</DialogTitle>
               </DialogHeader>
               <form onSubmit={handleAddTask} className="space-y-4">
                 <div>
-                  <div>Task Description</div>
-                  <input
+                  <label
+                    htmlFor="task"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    Task Description
+                  </label>
+                  <Input
                     id="task"
                     value={newTask}
                     onChange={(e) => setNewTask(e.target.value)}
-                    placeholder="Enter task description"
+                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    placeholder="Enter Todo."
                   />
                 </div>
                 <div className="flex justify-end gap-2">
@@ -129,17 +135,22 @@ const Board: React.FC = () => {
                     type="button"
                     variant="outline"
                     onClick={() => setIsDialogOpen(false)}
+                    className="border border-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-50"
                   >
                     Cancel
                   </Button>
-                  <Button type="submit">Add Task</Button>
+                  <Button
+                    type="submit"
+                    className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+                  >
+                    Add Task
+                  </Button>
                 </div>
               </form>
             </DialogContent>
           </Dialog>
         </div>
 
-        {/* Kanban Board */}
         <div className="flex gap-6 justify-center flex-1">
           {(Object.entries(tasks) as [keyof TaskList, Task[]][]).map(
             ([listName, listTasks]) => (
@@ -169,7 +180,7 @@ const Board: React.FC = () => {
                           </p>
                           <div className="mt-2 text-xs text-gray-500">
                             <span>Start: {task.startDate}</span>
-                            {task.endDate && (
+                            {listName === 'done' && task.endDate && (
                               <span className="ml-2">End: {task.endDate}</span>
                             )}
                           </div>
