@@ -1,15 +1,6 @@
 import React, { useState } from 'react';
-import { Plus } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
+import { AddDialog } from './add-dialog';
 
 interface Task {
   id: string;
@@ -36,28 +27,20 @@ const Board: React.FC = () => {
     done: [],
   });
 
-  const [newTask, setNewTask] = useState<string>('');
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const handleAddTask = (taskContent: string, startDate: string) => {
+    const task: Task = {
+      id: Date.now().toString(),
+      content: taskContent,
+      startDate: startDate,
+    };
 
-  const handleAddTask = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (newTask.trim()) {
-      const task: Task = {
-        id: Date.now().toString(),
-        content: newTask.trim(),
-        startDate: new Date().toISOString().split('T')[0],
-      };
-
-      setTasks((prev) => ({
-        ...prev,
-        todo: [...prev.todo, task],
-      }));
-      setNewTask('');
-      setIsDialogOpen(false);
-    }
+    setTasks((prev) => ({
+      ...prev,
+      todo: [...prev.todo, task],
+    }));
   };
 
+  // 나머지 코드는 이전과 동일
   const handleDragStart = (
     e: DragEvent<HTMLDivElement>,
     id: string,
@@ -99,58 +82,16 @@ const Board: React.FC = () => {
     });
   };
 
+  // 나머지 렌더링 코드는 동일하지만 AddDialog로 변경
   return (
     <div className="h-[90vh] bg-gray-100 p-6">
       <div className="h-full max-w-7xl mx-auto flex flex-col">
         <div className="mb-6 flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-gray-800">Kanban Board</h2>
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">
-                <Plus size={20} /> Add Task
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="bg-white shadow-md rounded-lg p-4">
-              <DialogHeader>
-                <DialogTitle>Add New Task</DialogTitle>
-              </DialogHeader>
-              <form onSubmit={handleAddTask} className="space-y-4">
-                <div>
-                  <label
-                    htmlFor="task"
-                    className="block text-sm font-medium text-gray-700"
-                  >
-                    Task Description
-                  </label>
-                  <Input
-                    id="task"
-                    value={newTask}
-                    onChange={(e) => setNewTask(e.target.value)}
-                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                    placeholder="Enter Todo."
-                  />
-                </div>
-                <div className="flex justify-end gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setIsDialogOpen(false)}
-                    className="border border-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-50"
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    type="submit"
-                    className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
-                  >
-                    Add Task
-                  </Button>
-                </div>
-              </form>
-            </DialogContent>
-          </Dialog>
+          <h2 className="text-2xl font-bold text-gray-800">Board</h2>
+          <AddDialog onAddTask={handleAddTask} />
         </div>
 
+        {/* 나머지 코드는 이전과 동일 */}
         <div className="flex gap-6 justify-center flex-1">
           {(Object.entries(tasks) as [keyof TaskList, Task[]][]).map(
             ([listName, listTasks]) => (
