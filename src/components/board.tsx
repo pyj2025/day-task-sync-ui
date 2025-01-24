@@ -40,7 +40,6 @@ const Board: React.FC = () => {
     }));
   };
 
-  // 나머지 코드는 이전과 동일
   const handleDragStart = (
     e: DragEvent<HTMLDivElement>,
     id: string,
@@ -82,7 +81,6 @@ const Board: React.FC = () => {
     });
   };
 
-  // 나머지 렌더링 코드는 동일하지만 AddDialog로 변경
   return (
     <div className="h-[90vh] bg-gray-100 p-6">
       <div className="h-full max-w-7xl mx-auto flex flex-col">
@@ -91,7 +89,6 @@ const Board: React.FC = () => {
           <AddDialog onAddTask={handleAddTask} />
         </div>
 
-        {/* 나머지 코드는 이전과 동일 */}
         <div className="flex gap-6 justify-center flex-1">
           {(Object.entries(tasks) as [keyof TaskList, Task[]][]).map(
             ([listName, listTasks]) => (
