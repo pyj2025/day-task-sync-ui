@@ -1,9 +1,21 @@
 import React, { useState } from 'react';
+import { useAuth } from '@/hooks/useAuth';
+import Login from '@/components/login';
 import Calendar from '@/components/calendar';
 import Board from '@/components/board';
 
 export default function Home() {
+  const { user, isLoading } = useAuth();
+
   const [activeComponent, setActiveComponent] = useState('calendar');
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (!user) {
+    return <Login />;
+  }
 
   return (
     <div>
