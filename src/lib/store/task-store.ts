@@ -1,0 +1,102 @@
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
+
+export type Task = {
+  id: string;
+  content: string;
+  startDate: string;
+  endDate?: string;
+};
+
+export type TaskList = {
+  [key in 'todo' | 'inProgress' | 'done']: Task[];
+};
+
+interface TaskStore {
+  tasks: TaskList;
+  visibleTasks: {
+    [key in keyof TaskList]: number;
+  };
+  addTask: (taskContent: string, startDate: string) => void;
+  moveTask: (taskId: string, sourceList: keyof TaskList, targetList: keyof TaskList) => void;
+  showMoreTasks: (listName: keyof TaskList) => void;
+}
+
+const useTaskStore = create<TaskStore>()(
+  persist(
+    (set) => ({
+      tasks: {
+        todo: [
+          { id: '1', content: 'Learn TypeScript', startDate: '2025-01-21' },
+          { id: '2', content: 'Build Drag & Drop', startDate: '2025-01-21' },
+          { id: '3', content: 'Study React Hooks', startDate: '2025-01-22' },
+          { id: '4', content: 'Create UI Components', startDate: '2025-01-22' },
+          { id: '5', content: 'Optimize Performance', startDate: '2025-01-23' },
+          { id: '6', content: 'Write Documentation', startDate: '2025-01-23' },
+          { id: '7', content: 'Design Database Schema', startDate: '2025-01-24' },
+          { id: '8', content: 'Implement Authentication', startDate: '2025-01-24' },
+          { id: '9', content: 'Setup CI/CD Pipeline', startDate: '2025-01-25' },
+          { id: '10', content: 'Create Test Cases', startDate: '2025-01-25' },
+          { id: '11', content: 'Review Code', startDate: '2025-01-26' },
+          { id: '12', content: 'Refactor Legacy Code', startDate: '2025-01-26' },
+        ],
+        inProgress: [],
+        done: [],
+      },
+      visibleTasks: {
+        todo: 7,
+        inProgress: 7,
+        done: 7,
+      },
+      addTask: (taskContent: string, startDate: string) => 
+        set((state) => ({
+          tasks: {
+            ...state.tasks,
+            todo: [
+              ...state.tasks.todo, 
+              { 
+                id: Date.now().toString(), 
+                content: taskContent, 
+                startDate: startDate 
+              }
+            ]
+          }
+        })),
+      moveTask: (taskId: string, sourceList: keyof TaskList, targetList: keyof TaskList) => 
+        set((state) => {
+          const sourceTasks = [...state.tasks[sourceList]];
+          const targetTasks = [...state.tasks[targetList]];
+
+          const taskToMove = sourceTasks.find((task) => task.id === taskId);
+          if (!taskToMove) return state;
+
+          const updatedTask = { ...taskToMove };
+          if (targetList === 'done') {
+            updatedTask.endDate = new Date().toISOString().split('T')[0];
+          }
+
+          return {
+            tasks: {
+              ...state.tasks,
+              [sourceList]: sourceTasks.filter((task) => task.id !== taskId),
+              [targetList]: [...targetTasks, updatedTask],
+            }
+          };
+        }),
+      showMoreTasks: (listName: keyof TaskList) => 
+        set((state) => ({
+          visibleTasks: {
+            ...state.visibleTasks,
+            [listName]: state.visibleTasks[listName] + 7,
+          }
+        })),
+    }),
+    {
+      name: 'task-board-storage', // name of the item in the storage (must be unique)
+      // Optional: customize storage (localStorage by default)
+      // storage: createJSONStorage(() => sessionStorage), // or use asyncStorage in React Native
+    }
+  )
+);
+
+export default useTaskStore;
