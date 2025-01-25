@@ -6,6 +6,7 @@ export type Task = {
   content: string;
   startDate: string;
   endDate?: string;
+  color?: string;
 };
 
 export type TaskList = {
@@ -17,14 +18,21 @@ interface TaskStore {
   visibleTasks: {
     [key in keyof TaskList]: number;
   };
-  addTask: (taskContent: string, startDate: string) => void;
-  moveTask: (taskId: string, sourceList: keyof TaskList, targetList: keyof TaskList) => void;
+  addTask: (task: Omit<Task, 'id'>) => void;
+  moveTask: (
+    taskId: string,
+    sourceList: keyof TaskList,
+    targetList: keyof TaskList
+  ) => void;
   showMoreTasks: (listName: keyof TaskList) => void;
+  editTask: (taskId: string, updatedTask: Partial<Task>) => void;
+  deleteTask: (taskId: string) => void;
+  getTasksByDate: (date: string) => Task[];
 }
 
 const useTaskStore = create<TaskStore>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       tasks: {
         todo: [
           { id: '1', content: 'Learn TypeScript', startDate: '2025-01-21' },
@@ -33,12 +41,24 @@ const useTaskStore = create<TaskStore>()(
           { id: '4', content: 'Create UI Components', startDate: '2025-01-22' },
           { id: '5', content: 'Optimize Performance', startDate: '2025-01-23' },
           { id: '6', content: 'Write Documentation', startDate: '2025-01-23' },
-          { id: '7', content: 'Design Database Schema', startDate: '2025-01-24' },
-          { id: '8', content: 'Implement Authentication', startDate: '2025-01-24' },
+          {
+            id: '7',
+            content: 'Design Database Schema',
+            startDate: '2025-01-24',
+          },
+          {
+            id: '8',
+            content: 'Implement Authentication',
+            startDate: '2025-01-24',
+          },
           { id: '9', content: 'Setup CI/CD Pipeline', startDate: '2025-01-25' },
           { id: '10', content: 'Create Test Cases', startDate: '2025-01-25' },
           { id: '11', content: 'Review Code', startDate: '2025-01-26' },
-          { id: '12', content: 'Refactor Legacy Code', startDate: '2025-01-26' },
+          {
+            id: '12',
+            content: 'Refactor Legacy Code',
+            startDate: '2025-01-26',
+          },
         ],
         inProgress: [],
         done: [],
@@ -48,21 +68,25 @@ const useTaskStore = create<TaskStore>()(
         inProgress: 7,
         done: 7,
       },
-      addTask: (taskContent: string, startDate: string) => 
+      addTask: (task) =>
         set((state) => ({
           tasks: {
             ...state.tasks,
             todo: [
-              ...state.tasks.todo, 
-              { 
-                id: Date.now().toString(), 
-                content: taskContent, 
-                startDate: startDate 
-              }
-            ]
-          }
+              ...state.tasks.todo,
+              {
+                ...task,
+                id: Date.now().toString(),
+                color: task.color || '#3B82F6',
+              },
+            ],
+          },
         })),
-      moveTask: (taskId: string, sourceList: keyof TaskList, targetList: keyof TaskList) => 
+      moveTask: (
+        taskId: string,
+        sourceList: keyof TaskList,
+        targetList: keyof TaskList
+      ) =>
         set((state) => {
           const sourceTasks = [...state.tasks[sourceList]];
           const targetTasks = [...state.tasks[targetList]];
@@ -80,21 +104,64 @@ const useTaskStore = create<TaskStore>()(
               ...state.tasks,
               [sourceList]: sourceTasks.filter((task) => task.id !== taskId),
               [targetList]: [...targetTasks, updatedTask],
-            }
+            },
           };
         }),
-      showMoreTasks: (listName: keyof TaskList) => 
+      showMoreTasks: (listName: keyof TaskList) =>
         set((state) => ({
           visibleTasks: {
             ...state.visibleTasks,
             [listName]: state.visibleTasks[listName] + 7,
-          }
+          },
         })),
+      editTask: (taskId, updatedTask) =>
+        set((state) => {
+          const updatedTasks = Object.keys(state.tasks).reduce(
+            (acc, listKey) => {
+              const list = listKey as keyof TaskList;
+              const taskIndex = state.tasks[list].findIndex(
+                (t) => t.id === taskId
+              );
+
+              if (taskIndex !== -1) {
+                const newList = [...state.tasks[list]];
+                newList[taskIndex] = { ...newList[taskIndex], ...updatedTask };
+                acc[list] = newList;
+              } else {
+                acc[list] = state.tasks[list];
+              }
+
+              return acc;
+            },
+            {} as TaskList
+          );
+
+          return { tasks: updatedTasks };
+        }),
+      deleteTask: (taskId) =>
+        set((state) => {
+          const updatedTasks = Object.keys(state.tasks).reduce(
+            (acc, listKey) => {
+              const list = listKey as keyof TaskList;
+              acc[list] = state.tasks[list].filter((t) => t.id !== taskId);
+              return acc;
+            },
+            {} as TaskList
+          );
+
+          return { tasks: updatedTasks };
+        }),
+      getTasksByDate: (date) => {
+        const allTasks = [
+          ...get().tasks.todo,
+          ...get().tasks.inProgress,
+          ...get().tasks.done,
+        ];
+        return allTasks.filter((task) => task.startDate === date);
+      },
     }),
     {
-      name: 'task-board-storage', // name of the item in the storage (must be unique)
-      // Optional: customize storage (localStorage by default)
-      // storage: createJSONStorage(() => sessionStorage), // or use asyncStorage in React Native
+      name: 'task-storage',
     }
   )
 );

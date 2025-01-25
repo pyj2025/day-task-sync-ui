@@ -7,6 +7,7 @@ import {
   AiOutlineLeft,
   AiOutlineRight,
 } from 'react-icons/ai';
+import useTaskStore, { Task, TaskList } from '@/lib/store/task-store';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { Button } from './ui/button';
 
@@ -19,21 +20,20 @@ interface Note {
 
 interface DayProps {
   date: Date;
-  notes: Note[];
+  tasks: Task[];
   isCurrentMonth: boolean;
-  onAddNote: (date: string) => void;
-  onEditNote: (note: Note) => void;
-  onDeleteNote: (noteId: string) => void;
+  onAddTask: (date: string) => void;
+  onEditTask: (task: Task) => void;
 }
 
 const DayCell: React.FC<DayProps> = ({
   date,
-  notes,
+  tasks,
   isCurrentMonth,
-  onAddNote,
-  onEditNote,
-  onDeleteNote,
+  onAddTask,
+  onEditTask,
 }) => {
+  const { deleteTask } = useTaskStore();
   const formattedDate = date.toISOString().split('T')[0];
   const isToday = new Date().toISOString().split('T')[0] === formattedDate;
 
@@ -57,28 +57,32 @@ const DayCell: React.FC<DayProps> = ({
           variant="ghost"
           size="sm"
           className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 hover:bg-gray-200"
-          onClick={() => onAddNote(formattedDate)}
+          onClick={() => onAddTask(formattedDate)}
         >
           <AiOutlinePlus className="h-3 w-3 text-gray-600" />
         </Button>
       </div>
       <div className="mt-2 space-y-1">
-        {notes.map((note) => (
+        {tasks.map((task) => (
           <div
-            key={note.id}
-            className="text-xs p-1.5 rounded-md bg-white border border-gray-200 shadow-sm 
+            key={task.id}
+            className="text-xs p-1.5 rounded-md border shadow-sm 
                      flex justify-between items-center group hover:border-gray-300 transition-all"
+            style={{
+              backgroundColor: task.color || '#F3F4F6',
+              borderColor: task.color || '#E5E7EB',
+            }}
           >
-            <span className="truncate text-gray-700">{note.content}</span>
+            <span className="truncate text-gray-700">{task.content}</span>
             <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
               <button
-                onClick={() => onEditNote(note)}
+                onClick={() => onEditTask(task)}
                 className="hover:text-blue-600 p-1 rounded-md hover:bg-gray-100"
               >
                 <AiOutlineEdit className="h-3 w-3" />
               </button>
               <button
-                onClick={() => onDeleteNote(note.id)}
+                onClick={() => deleteTask(task.id)}
                 className="hover:text-red-600 p-1 rounded-md hover:bg-gray-100"
               >
                 <AiOutlineClose className="h-3 w-3" />
@@ -92,12 +96,14 @@ const DayCell: React.FC<DayProps> = ({
 };
 
 const Calendar: React.FC = () => {
+  const { addTask, editTask } = useTaskStore();
+
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [notes, setNotes] = useState<Note[]>([]);
   const [selectedDate, setSelectedDate] = useState<string>('');
-  const [editingNote, setEditingNote] = useState<Note | null>(null);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [noteContent, setNoteContent] = useState('');
+  const [taskContent, setTaskContent] = useState('');
+  const [taskColor, setTaskColor] = useState('#3B82F6');
 
   const getDaysInMonth = (date: Date) => {
     const year = date.getFullYear();
@@ -135,44 +141,42 @@ const Calendar: React.FC = () => {
     );
   };
 
-  const handleAddNote = (date: string) => {
+  const handleAddTask = (date: string) => {
     setSelectedDate(date);
-    setEditingNote(null);
-    setNoteContent('');
+    setEditingTask(null);
+    setTaskContent('');
+    setTaskColor('#3B82F6');
     setIsDialogOpen(true);
   };
 
-  const handleEditNote = (note: Note) => {
-    setEditingNote(note);
-    setNoteContent(note.content);
+  const handleEditTask = (task: Task) => {
+    setEditingTask(task);
+    setTaskContent(task.content);
+    setTaskColor(task.color || '#3B82F6');
     setIsDialogOpen(true);
   };
 
-  const handleSaveNote = () => {
-    if (editingNote) {
-      setNotes(
-        notes.map((note) =>
-          note.id === editingNote.id ? { ...note, content: noteContent } : note
-        )
-      );
+  const handleSaveTask = () => {
+    if (editingTask) {
+      editTask(editingTask.id, {
+        content: taskContent,
+        color: taskColor,
+      });
     } else {
-      setNotes([
-        ...notes,
-        {
-          id: Math.random().toString(36).substr(2, 9),
-          date: selectedDate,
-          content: noteContent,
-        },
-      ]);
+      addTask({
+        content: taskContent,
+        startDate: selectedDate,
+        color: taskColor,
+      });
     }
     setIsDialogOpen(false);
-    setNoteContent('');
-    setEditingNote(null);
+    setTaskContent('');
+    setEditingTask(null);
   };
 
-  const handleDeleteNote = (noteId: string) => {
-    setNotes(notes.filter((note) => note.id !== noteId));
-  };
+  // const handleDeleteNote = (noteId: string) => {
+  //   setNotes(notes.filter((note) => note.id !== noteId));
+  // };
 
   const days = getDaysInMonth(currentDate);
   const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -218,37 +222,57 @@ const Calendar: React.FC = () => {
             {day}
           </div>
         ))}
-        {days.map((date, index) => (
-          <DayCell
-            key={index}
-            date={date}
-            notes={notes.filter(
-              (note) => note.date === date.toISOString().split('T')[0]
-            )}
-            isCurrentMonth={date.getMonth() === currentDate.getMonth()}
-            onAddNote={handleAddNote}
-            onEditNote={handleEditNote}
-            onDeleteNote={handleDeleteNote}
-          />
-        ))}
+        {days.map((date, index) => {
+          const tasks = useTaskStore
+            .getState()
+            .getTasksByDate(date.toISOString().split('T')[0]);
+
+          return (
+            <DayCell
+              key={index}
+              date={date}
+              tasks={tasks}
+              isCurrentMonth={date.getMonth() === currentDate.getMonth()}
+              onAddTask={handleAddTask}
+              onEditTask={handleEditTask}
+            />
+          );
+        })}
       </div>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="bg-gray-50 border-0">
           <DialogHeader>
             <DialogTitle className="text-gray-800">
-              {editingNote ? 'Edit Note' : 'Add Note'}
+              {editingTask ? 'Edit Task' : 'Add Task'}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <textarea
-              value={noteContent}
-              onChange={(e) => setNoteContent(e.target.value)}
+              value={taskContent}
+              onChange={(e) => setTaskContent(e.target.value)}
               className="w-full min-h-[120px] p-3 border border-gray-200 rounded-lg 
                        focus:ring-2 focus:ring-blue-500 focus:border-transparent
                        placeholder:text-gray-400 text-gray-700 bg-white"
-              placeholder="Enter your note..."
+              placeholder="Enter your task..."
             />
+            <div className="flex items-center gap-2">
+              <span>Color:</span>
+              {['#3B82F6', '#10B981', '#F43F5E', '#F59E0B', '#6366F1'].map(
+                (color) => (
+                  <button
+                    key={color}
+                    onClick={() => setTaskColor(color)}
+                    className={`w-6 h-6 rounded-full ${
+                      taskColor === color
+                        ? 'ring-2 ring-offset-2 ring-gray-400'
+                        : ''
+                    }`}
+                    style={{ backgroundColor: color }}
+                  />
+                )
+              )}
+            </div>
             <div className="flex justify-end gap-2">
               <Button
                 variant="outline"
@@ -258,8 +282,9 @@ const Calendar: React.FC = () => {
                 Cancel
               </Button>
               <Button
-                onClick={handleSaveNote}
+                onClick={handleSaveTask}
                 className="bg-blue-500 hover:bg-blue-600 text-white"
+                disabled={!taskContent.trim()}
               >
                 Save
               </Button>
