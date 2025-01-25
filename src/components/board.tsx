@@ -1,63 +1,11 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { AddDialog } from './add-dialog';
 import { Button } from '@/components/ui/button';
-
-interface Task {
-  id: string;
-  content: string;
-  startDate: string;
-  endDate?: string;
-}
-
-type TaskList = {
-  [key in 'todo' | 'inProgress' | 'done']: Task[];
-};
-
-interface DragEvent<T = Element> extends React.DragEvent<T> {
-  dataTransfer: DataTransfer;
-}
+import { AddDialog } from './add-dialog';
+import useTaskStore, { Task, TaskList } from '@/lib/store/task-store';
 
 const Board: React.FC = () => {
-  const [tasks, setTasks] = useState<TaskList>({
-    todo: [
-      { id: '1', content: 'Learn TypeScript', startDate: '2025-01-21' },
-      { id: '2', content: 'Build Drag & Drop', startDate: '2025-01-21' },
-      { id: '3', content: 'Study React Hooks', startDate: '2025-01-22' },
-      { id: '4', content: 'Create UI Components', startDate: '2025-01-22' },
-      { id: '5', content: 'Optimize Performance', startDate: '2025-01-23' },
-      { id: '6', content: 'Write Documentation', startDate: '2025-01-23' },
-      { id: '7', content: 'Design Database Schema', startDate: '2025-01-24' },
-      { id: '8', content: 'Implement Authentication', startDate: '2025-01-24' },
-      { id: '9', content: 'Setup CI/CD Pipeline', startDate: '2025-01-25' },
-      { id: '10', content: 'Create Test Cases', startDate: '2025-01-25' },
-      { id: '11', content: 'Review Code', startDate: '2025-01-26' },
-      { id: '12', content: 'Refactor Legacy Code', startDate: '2025-01-26' },
-    ],
-    inProgress: [],
-    done: [],
-  });
-
-  const [visibleTasks, setVisibleTasks] = useState<{
-    [key in keyof TaskList]: number;
-  }>({
-    todo: 7,
-    inProgress: 7,
-    done: 7,
-  });
-
-  const handleAddTask = (taskContent: string, startDate: string) => {
-    const task: Task = {
-      id: Date.now().toString(),
-      content: taskContent,
-      startDate: startDate,
-    };
-
-    setTasks((prev) => ({
-      ...prev,
-      todo: [...prev.todo, task],
-    }));
-  };
+  const { tasks, visibleTasks, moveTask, showMoreTasks } = useTaskStore();
 
   const handleDragStart = (
     e: React.DragEvent<HTMLDivElement>,
@@ -82,29 +30,7 @@ const Board: React.FC = () => {
 
     if (sourceList === targetList) return;
 
-    const sourceTasks = [...tasks[sourceList]];
-    const targetTasks = [...tasks[targetList]];
-
-    const taskToMove = sourceTasks.find((task) => task.id === taskId);
-    if (!taskToMove) return;
-
-    const updatedTask = { ...taskToMove };
-    if (targetList === 'done') {
-      updatedTask.endDate = new Date().toISOString().split('T')[0];
-    }
-
-    setTasks({
-      ...tasks,
-      [sourceList]: sourceTasks.filter((task) => task.id !== taskId),
-      [targetList]: [...targetTasks, updatedTask],
-    });
-  };
-
-  const handleShowMore = (listName: keyof TaskList) => {
-    setVisibleTasks((prev) => ({
-      ...prev,
-      [listName]: prev[listName] + 7,
-    }));
+    moveTask(taskId, sourceList, targetList);
   };
 
   return (
@@ -112,7 +38,7 @@ const Board: React.FC = () => {
       <div className="h-full max-w-7xl mx-auto flex flex-col">
         <div className="mb-6 flex items-center justify-between">
           <h2 className="text-2xl font-bold text-gray-800">Board</h2>
-          <AddDialog onAddTask={handleAddTask} />
+          <AddDialog onAddTask={useTaskStore.getState().addTask} />
         </div>
 
         <div className="flex gap-6 justify-center flex-1">
@@ -162,7 +88,7 @@ const Board: React.FC = () => {
                       {hasMoreTasks && (
                         <Button
                           variant="outline"
-                          onClick={() => handleShowMore(listName)}
+                          onClick={() => showMoreTasks(listName)}
                           className="w-full"
                         >
                           Show More
