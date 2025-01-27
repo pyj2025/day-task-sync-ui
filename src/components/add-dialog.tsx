@@ -9,9 +9,10 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import { Task } from '@/lib/store/task-store';
 
 interface AddDialogProps {
-  onAddTask: (taskContent: string, startDate: string) => void;
+  onAddTask: (task: Omit<Task, 'id'>) => void;
 }
 
 export const AddDialog: React.FC<AddDialogProps> = ({ onAddTask }) => {
