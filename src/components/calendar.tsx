@@ -11,6 +11,8 @@ import useTaskStore, { Task, TaskList } from '@/lib/store/task-store';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { Button } from './ui/button';
 
+const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
 interface Note {
   id: string;
   date: string;
@@ -67,7 +69,7 @@ const DayCell: React.FC<DayProps> = ({
           <div
             key={task.id}
             className="text-xs p-1.5 rounded-md border shadow-sm 
-                     flex justify-between items-center group hover:border-gray-300 transition-all"
+                    flex justify-between items-center group hover:border-gray-300 transition-all"
             style={{
               backgroundColor: task.color || '#F3F4F6',
               borderColor: task.color || '#E5E7EB',
@@ -113,8 +115,11 @@ const Calendar: React.FC = () => {
 
     const days: Date[] = [];
 
-    for (let i = 0; i < firstDay.getDay(); i++) {
-      days.push(new Date(year, month, -i));
+    const prevMonthLastDate = new Date(year, month, 0);
+    const prevMonthLastDay = prevMonthLastDate.getDate();
+
+    for (let i = firstDay.getDay(); i > 0; i--) {
+      days.push(new Date(year, month - 1, prevMonthLastDay - i + 1));
     }
 
     for (let i = 1; i <= lastDay.getDate(); i++) {
@@ -174,12 +179,7 @@ const Calendar: React.FC = () => {
     setEditingTask(null);
   };
 
-  // const handleDeleteNote = (noteId: string) => {
-  //   setNotes(notes.filter((note) => note.id !== noteId));
-  // };
-
   const days = getDaysInMonth(currentDate);
-  const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
   return (
     <div className="w-full max-w-6xl mx-auto p-6 bg-gray-50 rounded-xl shadow-lg">
@@ -252,8 +252,8 @@ const Calendar: React.FC = () => {
               value={taskContent}
               onChange={(e) => setTaskContent(e.target.value)}
               className="w-full min-h-[120px] p-3 border border-gray-200 rounded-lg 
-                       focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                       placeholder:text-gray-400 text-gray-700 bg-white"
+                      focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                      placeholder:text-gray-400 text-gray-700 bg-white"
               placeholder="Enter your task..."
             />
             <div className="flex items-center gap-2">
