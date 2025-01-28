@@ -26,7 +26,10 @@ export const AddDialog: React.FC<AddDialogProps> = ({ onAddTask }) => {
     e.preventDefault();
 
     if (newTask.trim()) {
-      onAddTask(newTask.trim(), startDate);
+      onAddTask({
+        content: newTask.trim(),
+        startDate,
+      });
       setNewTask('');
       setStartDate(new Date().toISOString().split('T')[0]);
       setIsDialogOpen(false);
