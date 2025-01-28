@@ -318,12 +318,18 @@ const Calendar: React.FC = () => {
         onOpenChange={setIsTaskListDialogOpen}
       >
         <DialogContent className="bg-gray-50 border-0">
-          <DialogHeader>
+          <DialogHeader className="flex flex-row items-center justify-between">
             <DialogTitle className="text-gray-800">
               {selectedDayTasks && formatDate(selectedDayTasks.date)}
             </DialogTitle>
+            <button
+              onClick={() => setIsTaskListDialogOpen(false)}
+              className="p-2 hover:bg-gray-200 rounded-full transition-colors"
+            >
+              <AiOutlineClose className="h-5 w-5 text-gray-600" />
+            </button>
           </DialogHeader>
-          <div className="space-y-3">
+          <div className="space-y-3 mt-4">
             {selectedDayTasks?.tasks.length === 0 ? (
               <p className="text-gray-500 text-center py-4">
                 No tasks for this day
