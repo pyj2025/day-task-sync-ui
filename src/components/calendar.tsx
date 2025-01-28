@@ -13,19 +13,13 @@ import { Button } from './ui/button';
 
 const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-interface Note {
-  id: string;
-  date: string;
-  content: string;
-  color?: string;
-}
-
 interface DayProps {
   date: Date;
   tasks: Task[];
   isCurrentMonth: boolean;
   onAddTask: (date: string) => void;
   onEditTask: (task: Task) => void;
+  onDayClick: (date: Date, tasks: Task[]) => void;
 }
 
 const DayCell: React.FC<DayProps> = ({
@@ -34,6 +28,7 @@ const DayCell: React.FC<DayProps> = ({
   isCurrentMonth,
   onAddTask,
   onEditTask,
+  onDayClick,
 }) => {
   const { deleteTask } = useTaskStore();
   const formattedDate = date.toISOString().split('T')[0];
@@ -41,9 +36,10 @@ const DayCell: React.FC<DayProps> = ({
 
   return (
     <div
-      className={`min-h-[120px] border-[0.5px] border-gray-200 p-2 transition-colors ${
+      className={`min-h-[120px] border-[0.5px] border-gray-200 p-2 transition-colors cursor-pointer ${
         isCurrentMonth ? 'bg-gray-50 hover:bg-gray-100' : 'bg-gray-100'
       }`}
+      onClick={() => onDayClick(date, tasks)}
     >
       <div className="flex justify-between items-center">
         <span
@@ -59,7 +55,10 @@ const DayCell: React.FC<DayProps> = ({
           variant="ghost"
           size="sm"
           className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 hover:bg-gray-200"
-          onClick={() => onAddTask(formattedDate)}
+          onClick={(e) => {
+            e.stopPropagation();
+            onAddTask(formattedDate);
+          }}
         >
           <AiOutlinePlus className="h-3 w-3 text-gray-600" />
         </Button>
@@ -74,6 +73,7 @@ const DayCell: React.FC<DayProps> = ({
               backgroundColor: task.color || '#F3F4F6',
               borderColor: task.color || '#E5E7EB',
             }}
+            onClick={(e) => e.stopPropagation()}
           >
             <span className="truncate text-gray-700">{task.content}</span>
             <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -104,8 +104,13 @@ const Calendar: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState<string>('');
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isTaskListDialogOpen, setIsTaskListDialogOpen] = useState(false);
   const [taskContent, setTaskContent] = useState('');
   const [taskColor, setTaskColor] = useState('#3B82F6');
+  const [selectedDayTasks, setSelectedDayTasks] = useState<{
+    date: Date;
+    tasks: Task[];
+  } | null>(null);
 
   const getDaysInMonth = (date: Date) => {
     const year = date.getFullYear();
@@ -179,6 +184,20 @@ const Calendar: React.FC = () => {
     setEditingTask(null);
   };
 
+  const handleDayClick = (date: Date, tasks: Task[]) => {
+    setSelectedDayTasks({ date, tasks });
+    setIsTaskListDialogOpen(true);
+  };
+
+  const formatDate = (date: Date) => {
+    return date.toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  };
+
   const days = getDaysInMonth(currentDate);
 
   return (
@@ -235,6 +254,7 @@ const Calendar: React.FC = () => {
               isCurrentMonth={date.getMonth() === currentDate.getMonth()}
               onAddTask={handleAddTask}
               onEditTask={handleEditTask}
+              onDayClick={handleDayClick}
             />
           );
         })}
@@ -289,6 +309,68 @@ const Calendar: React.FC = () => {
                 Save
               </Button>
             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={isTaskListDialogOpen}
+        onOpenChange={setIsTaskListDialogOpen}
+      >
+        <DialogContent className="bg-gray-50 border-0">
+          <DialogHeader>
+            <DialogTitle className="text-gray-800">
+              {selectedDayTasks && formatDate(selectedDayTasks.date)}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            {selectedDayTasks?.tasks.length === 0 ? (
+              <p className="text-gray-500 text-center py-4">
+                No tasks for this day
+              </p>
+            ) : (
+              selectedDayTasks?.tasks.map((task) => (
+                <div
+                  key={task.id}
+                  className="p-3 rounded-lg border shadow-sm flex justify-between items-center"
+                  style={{
+                    backgroundColor: task.color || '#F3F4F6',
+                    borderColor: task.color || '#E5E7EB',
+                  }}
+                >
+                  <span className="text-gray-700">{task.content}</span>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => {
+                        setIsTaskListDialogOpen(false);
+                        handleEditTask(task);
+                      }}
+                      className="hover:text-blue-600 p-1 rounded-md hover:bg-gray-100"
+                    >
+                      <AiOutlineEdit className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={() => {
+                        deleteTask(task.id);
+                        setSelectedDayTasks((prev) =>
+                          prev
+                            ? {
+                                ...prev,
+                                tasks: prev.tasks.filter(
+                                  (t) => t.id !== task.id
+                                ),
+                              }
+                            : null
+                        );
+                      }}
+                      className="hover:text-red-600 p-1 rounded-md hover:bg-gray-100"
+                    >
+                      <AiOutlineClose className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </DialogContent>
       </Dialog>
