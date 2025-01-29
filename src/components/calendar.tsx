@@ -15,6 +15,7 @@ import DayCell from './day-cell';
 const Calendar: React.FC = () => {
   const { addTask, editTask } = useTaskStore();
 
+  const [mounted, setMounted] = useState(false);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<string>('');
   const [editingTask, setEditingTask] = useState<Task | null>(null);
@@ -26,6 +27,10 @@ const Calendar: React.FC = () => {
     date: Date;
     tasks: Task[];
   } | null>(null);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const getDaysInMonth = (date: Date) => {
     const year = date.getFullYear();
@@ -53,6 +58,10 @@ const Calendar: React.FC = () => {
 
     return days;
   };
+
+  if (!mounted) {
+    return null;
+  }
 
   const handlePreviousMonth = () => {
     setCurrentDate(
