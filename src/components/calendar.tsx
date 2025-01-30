@@ -5,6 +5,7 @@ import {
   AiOutlineEdit,
   AiOutlineLeft,
   AiOutlineRight,
+  AiOutlinePlus,
 } from 'react-icons/ai';
 import useTaskStore, { Task } from '@/lib/store/task-store';
 import { WEEK_DAYS } from '@/lib/constants';
@@ -113,6 +114,16 @@ const Calendar: React.FC = () => {
     setIsTaskListDialogOpen(true);
   };
 
+  const handleAddTaskButton = () => {
+    const today = new Date();
+    const formattedDate = today.toISOString().split('T')[0];
+    setSelectedDate(formattedDate);
+    setEditingTask(null);
+    setTaskContent('');
+    setTaskColor('#3B82F6');
+    setIsDialogOpen(true);
+  };
+
   const formatDate = (date: Date) => {
     return date.toLocaleDateString('en-US', {
       weekday: 'long',
@@ -137,6 +148,13 @@ const Calendar: React.FC = () => {
           </h2>
         </div>
         <div className="flex gap-2">
+          <Button
+            onClick={handleAddTaskButton}
+            className="bg-blue-500 hover:bg-blue-600 text-white gap-2"
+          >
+            <AiOutlinePlus className="h-4 w-4" />
+            Add Task
+          </Button>
           <Button
             variant="outline"
             onClick={handlePreviousMonth}
