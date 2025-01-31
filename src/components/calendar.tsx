@@ -7,10 +7,10 @@ import {
 } from 'react-icons/ai';
 import useTaskStore, { Task } from '@/lib/store/task-store';
 import { WEEK_DAYS } from '@/lib/constants';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { Button } from './ui/button';
 import DayCell from './day-cell';
 import TaskListDialog from './task-list-dialog';
+import UpdateTaskDialog from './update-task-dialog';
 
 const Calendar: React.FC = () => {
   const { addTask, editTask } = useTaskStore();
@@ -123,15 +123,6 @@ const Calendar: React.FC = () => {
     setIsDialogOpen(true);
   };
 
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-  };
-
   const days = getDaysInMonth(currentDate);
 
   return (
@@ -172,7 +163,6 @@ const Calendar: React.FC = () => {
           </Button>
         </div>
       </div>
-
       <div className="grid grid-cols-7 bg-white rounded-lg shadow-sm overflow-hidden">
         {WEEK_DAYS.map((day: string) => (
           <div
@@ -200,60 +190,14 @@ const Calendar: React.FC = () => {
           );
         })}
       </div>
-
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="bg-gray-50 border-0">
-          <DialogHeader>
-            <DialogTitle className="text-gray-800">
-              {editingTask ? 'Edit Task' : 'Add Task'}
-            </DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <textarea
-              value={taskContent}
-              onChange={(e) => setTaskContent(e.target.value)}
-              className="w-full min-h-[120px] p-3 border border-gray-200 rounded-lg 
-                      focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                      placeholder:text-gray-400 text-gray-700 bg-white"
-              placeholder="Enter your task..."
-            />
-            <div className="flex items-center gap-2">
-              <span>Color:</span>
-              {['#3B82F6', '#10B981', '#F43F5E', '#F59E0B', '#6366F1'].map(
-                (color) => (
-                  <button
-                    key={color}
-                    onClick={() => setTaskColor(color)}
-                    className={`w-6 h-6 rounded-full ${
-                      taskColor === color
-                        ? 'ring-2 ring-offset-2 ring-gray-400'
-                        : ''
-                    }`}
-                    style={{ backgroundColor: color }}
-                  />
-                )
-              )}
-            </div>
-            <div className="flex justify-end gap-2">
-              <Button
-                variant="outline"
-                onClick={() => setIsDialogOpen(false)}
-                className="hover:bg-gray-100"
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={handleSaveTask}
-                className="bg-blue-500 hover:bg-blue-600 text-white"
-                disabled={!taskContent.trim()}
-              >
-                Save
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-
+      <UpdateTaskDialog
+        editingTask={editingTask}
+        isDialogOpen={isDialogOpen}
+        setIsDialogOpen={setIsDialogOpen}
+        taskContent={taskContent}
+        setTaskContent={setTaskContent}
+        saveTask={handleSaveTask}
+      />
       <TaskListDialog
         isTaskListDialogOpen={isTaskListDialogOpen}
         setIsTaskListDialogOpen={setIsTaskListDialogOpen}
