@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import {
   AiOutlineCalendar,
-  AiOutlineClose,
-  AiOutlineEdit,
   AiOutlineLeft,
   AiOutlineRight,
   AiOutlinePlus,
@@ -12,6 +10,7 @@ import { WEEK_DAYS } from '@/lib/constants';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { Button } from './ui/button';
 import DayCell from './day-cell';
+import TaskListDialog from './task-list-dialog';
 
 const Calendar: React.FC = () => {
   const { addTask, editTask } = useTaskStore();
@@ -255,73 +254,13 @@ const Calendar: React.FC = () => {
         </DialogContent>
       </Dialog>
 
-      <Dialog
-        open={isTaskListDialogOpen}
-        onOpenChange={setIsTaskListDialogOpen}
-      >
-        <DialogContent className="bg-gray-50 border-0">
-          <DialogHeader className="flex flex-row items-center justify-between">
-            <DialogTitle className="text-gray-800">
-              {selectedDayTasks && formatDate(selectedDayTasks.date)}
-            </DialogTitle>
-            <button
-              onClick={() => setIsTaskListDialogOpen(false)}
-              className="p-2 hover:bg-gray-200 rounded-full transition-colors"
-            >
-              <AiOutlineClose className="h-5 w-5 text-gray-600" />
-            </button>
-          </DialogHeader>
-          <div className="space-y-3 mt-4">
-            {selectedDayTasks?.tasks.length === 0 ? (
-              <p className="text-gray-500 text-center py-4">
-                No tasks for this day
-              </p>
-            ) : (
-              selectedDayTasks?.tasks.map((task) => (
-                <div
-                  key={task.id}
-                  className="p-3 rounded-lg border shadow-sm flex justify-between items-center"
-                  style={{
-                    backgroundColor: task.color || '#F3F4F6',
-                    borderColor: task.color || '#E5E7EB',
-                  }}
-                >
-                  <span className="text-gray-700">{task.content}</span>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => {
-                        setIsTaskListDialogOpen(false);
-                        handleEditTask(task);
-                      }}
-                      className="hover:text-blue-600 p-1 rounded-md hover:bg-gray-100"
-                    >
-                      <AiOutlineEdit className="h-4 w-4" />
-                    </button>
-                    <button
-                      onClick={() => {
-                        // deleteTask(task.id);
-                        setSelectedDayTasks((prev) =>
-                          prev
-                            ? {
-                                ...prev,
-                                tasks: prev.tasks.filter(
-                                  (t) => t.id !== task.id
-                                ),
-                              }
-                            : null
-                        );
-                      }}
-                      className="hover:text-red-600 p-1 rounded-md hover:bg-gray-100"
-                    >
-                      <AiOutlineClose className="h-4 w-4" />
-                    </button>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
+      <TaskListDialog
+        isTaskListDialogOpen={isTaskListDialogOpen}
+        setIsTaskListDialogOpen={setIsTaskListDialogOpen}
+        selectedDayTasks={selectedDayTasks}
+        setSelectedDayTasks={setSelectedDayTasks}
+        handleEditTask={handleEditTask}
+      />
     </div>
   );
 };
