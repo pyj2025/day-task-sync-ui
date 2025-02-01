@@ -40,7 +40,7 @@ export const AddDialog: React.FC<AddDialogProps> = ({ onAddTask }) => {
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       <DialogTrigger asChild>
         <Button className="flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">
-          <Plus size={20} /> Add
+          <Plus size={20} /> Add Task
         </Button>
       </DialogTrigger>
       <DialogContent className="bg-white shadow-md rounded-lg p-4">

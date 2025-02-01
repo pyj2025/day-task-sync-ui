@@ -57,8 +57,8 @@ const TaskListDialog: React.FC<TaskListDialogProps> = ({
                 key={task.id}
                 className="p-3 rounded-lg border shadow-sm flex justify-between items-center"
                 style={{
-                  backgroundColor: task.color || '#F3F4F6',
-                  borderColor: task.color || '#E5E7EB',
+                  backgroundColor: '#F3F4F6',
+                  borderColor: '#E5E7EB',
                 }}
               >
                 <span className="text-gray-700">{task.content}</span>

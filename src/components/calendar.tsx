@@ -22,7 +22,6 @@ const Calendar: React.FC = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isTaskListDialogOpen, setIsTaskListDialogOpen] = useState(false);
   const [taskContent, setTaskContent] = useState('');
-  const [taskColor, setTaskColor] = useState('#3B82F6');
   const [selectedDayTasks, setSelectedDayTasks] = useState<{
     date: Date;
     tasks: Task[];
@@ -79,14 +78,12 @@ const Calendar: React.FC = () => {
     setSelectedDate(date);
     setEditingTask(null);
     setTaskContent('');
-    setTaskColor('#3B82F6');
     setIsDialogOpen(true);
   };
 
   const handleEditTask = (task: Task) => {
     setEditingTask(task);
     setTaskContent(task.content);
-    setTaskColor(task.color || '#3B82F6');
     setIsDialogOpen(true);
   };
 
@@ -94,13 +91,11 @@ const Calendar: React.FC = () => {
     if (editingTask) {
       editTask(editingTask.id, {
         content: taskContent,
-        color: taskColor,
       });
     } else {
       addTask({
         content: taskContent,
         startDate: selectedDate,
-        color: taskColor,
       });
     }
     setIsDialogOpen(false);
@@ -119,7 +114,6 @@ const Calendar: React.FC = () => {
     setSelectedDate(formattedDate);
     setEditingTask(null);
     setTaskContent('');
-    setTaskColor('#3B82F6');
     setIsDialogOpen(true);
   };
 
