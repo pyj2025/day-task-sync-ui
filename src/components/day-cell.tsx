@@ -60,8 +60,8 @@ const DayCell: React.FC<DayProps> = ({
             className="text-xs p-1.5 rounded-md border shadow-sm 
                     flex justify-between items-center group hover:border-gray-300 transition-all"
             style={{
-              backgroundColor: task.color || '#F3F4F6',
-              borderColor: task.color || '#E5E7EB',
+              backgroundColor: '#F3F4F6',
+              borderColor: '#E5E7EB',
             }}
             onClick={(e) => e.stopPropagation()}
           >

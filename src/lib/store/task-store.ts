@@ -6,7 +6,6 @@ export type Task = {
   content: string;
   startDate: string;
   endDate?: string;
-  color?: string;
 };
 
 export type TaskList = {
@@ -77,7 +76,6 @@ const useTaskStore = create<TaskStore>()(
               {
                 ...task,
                 id: Date.now().toString(),
-                color: task.color || '#3B82F6',
               },
             ],
           },
