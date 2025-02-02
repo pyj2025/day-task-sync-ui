@@ -4,6 +4,8 @@ import Login from '@/components/login';
 import Calendar from '@/components/calendar';
 import Board from '@/components/board';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
+import { LogOut } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 
@@ -18,7 +20,7 @@ export default function Home() {
         data: { session },
       } = await supabase.auth.getSession();
       if (session) {
-        router.push('/calendar');
+        router.push('/');
       } else {
         router.push('/login');
       }
@@ -26,6 +28,11 @@ export default function Home() {
 
     checkUser();
   }, [router]);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push('/login');
+  };
 
   if (isLoading) {
     return (
@@ -43,26 +50,37 @@ export default function Home() {
     <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
       <div className="border-b bg-white">
         <div className="max-w-6xl mx-auto">
-          <Tabs
-            value={activeComponent}
-            onValueChange={setActiveComponent}
-            className="w-full flex justify-center"
-          >
-            <TabsList className="h-16">
-              <TabsTrigger
-                value="calendar"
-                className="data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700 px-8"
-              >
-                Calendar
-              </TabsTrigger>
-              <TabsTrigger
-                value="board"
-                className="data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700 px-8"
-              >
-                Board
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
+          <div className="flex items-center justify-between px-4">
+            <Tabs
+              value={activeComponent}
+              onValueChange={setActiveComponent}
+              className="flex-1"
+            >
+              <TabsList className="h-16">
+                <TabsTrigger
+                  value="calendar"
+                  className="data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700 px-8"
+                >
+                  Calendar
+                </TabsTrigger>
+                <TabsTrigger
+                  value="board"
+                  className="data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700 px-8"
+                >
+                  Board
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+            <Button
+              onClick={handleLogout}
+              variant="ghost"
+              size="sm"
+              className="text-gray-600 hover:text-gray-900"
+            >
+              <LogOut className="h-5 w-5 mr-2" />
+              Logout
+            </Button>
+          </div>
         </div>
       </div>
 

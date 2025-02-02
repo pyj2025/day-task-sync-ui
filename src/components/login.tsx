@@ -29,7 +29,7 @@ export default function Login() {
           password,
         });
         if (error) throw error;
-        router.push('/calendar');
+        router.push('/');
       }
     } catch (error: any) {
       setError(error.message);
