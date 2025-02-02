@@ -5,7 +5,6 @@ import {
   AiOutlineRight,
   AiOutlinePlus,
 } from 'react-icons/ai';
-import { useRouter } from 'next/navigation';
 import useTaskStore, { Task } from '@/lib/store/task-store';
 import { WEEK_DAYS } from '@/lib/constants';
 import { Button } from './ui/button';
@@ -15,7 +14,6 @@ import UpdateTaskDialog from './update-task-dialog';
 
 const Calendar: React.FC = () => {
   const { addTask, editTask } = useTaskStore();
-  const router = useRouter();
 
   const [mounted, setMounted] = useState(false);
   const [currentDate, setCurrentDate] = useState(new Date());
