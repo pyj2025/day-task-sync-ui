@@ -18,7 +18,7 @@ export default function Home() {
         data: { session },
       } = await supabase.auth.getSession();
       if (session) {
-        router.push('/calendar');
+        router.push('/');
       } else {
         router.push('/login');
       }
