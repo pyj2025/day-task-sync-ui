@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
-import { FaGithub, FaGoogle } from 'react-icons/fa';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -39,24 +38,6 @@ export default function Login() {
     }
   };
 
-  const handleGithubLogin = async () => {
-    const { data, error } = await supabase.auth.signInWithOAuth({
-      provider: 'github',
-      options: {
-        redirectTo: `${window.location.origin}/calendar`,
-      },
-    });
-  };
-
-  const handleGoogleLogin = async () => {
-    const { data, error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/calendar`,
-      },
-    });
-  };
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50 p-4">
       <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-2xl shadow-xl">
@@ -77,33 +58,6 @@ export default function Login() {
               {authMode === 'signin' ? 'Sign up' : 'Login'}
             </button>
           </p>
-        </div>
-
-        <div className="flex flex-col gap-4">
-          <button
-            onClick={handleGithubLogin}
-            className="flex items-center justify-center gap-3 w-full py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-          >
-            <FaGithub className="w-5 h-5" />
-            <span>Continue with GitHub</span>
-          </button>
-
-          <button
-            onClick={handleGoogleLogin}
-            className="flex items-center justify-center gap-3 w-full py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-          >
-            <FaGoogle className="w-5 h-5 text-red-500" />
-            <span>Continue with Google</span>
-          </button>
-
-          <div className="relative my-4">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-gray-500">or</span>
-            </div>
-          </div>
         </div>
 
         <form className="mt-6 space-y-6" onSubmit={handleAuth}>

@@ -4,16 +4,20 @@ import {
   AiOutlineLeft,
   AiOutlineRight,
   AiOutlinePlus,
+  AiOutlineLogout,
 } from 'react-icons/ai';
+import { useRouter } from 'next/navigation';
 import useTaskStore, { Task } from '@/lib/store/task-store';
 import { WEEK_DAYS } from '@/lib/constants';
 import { Button } from './ui/button';
 import DayCell from './day-cell';
 import TaskListDialog from './task-list-dialog';
 import UpdateTaskDialog from './update-task-dialog';
+import { supabase } from '@/lib/supabase';
 
 const Calendar: React.FC = () => {
   const { addTask, editTask } = useTaskStore();
+  const router = useRouter();
 
   const [mounted, setMounted] = useState(false);
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -30,6 +34,11 @@ const Calendar: React.FC = () => {
   React.useEffect(() => {
     setMounted(true);
   }, []);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push('/login');
+  };
 
   const getDaysInMonth = (date: Date) => {
     const year = date.getFullYear();
@@ -132,6 +141,14 @@ const Calendar: React.FC = () => {
           </h2>
         </div>
         <div className="flex gap-2">
+          <Button
+            onClick={handleLogout}
+            variant="outline"
+            className="bg-red-500 hover:bg-red-600 text-white gap-2"
+          >
+            <AiOutlineLogout className="h-4 w-4" />
+            Logout
+          </Button>
           <Button
             onClick={handleAddTaskButton}
             className="bg-blue-500 hover:bg-blue-600 text-white gap-2"
