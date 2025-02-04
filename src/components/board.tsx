@@ -4,10 +4,12 @@ import { AddDialog } from './add-dialog';
 import useTaskStore, { Task, TaskList } from '@/lib/store/task-store';
 
 const Board: React.FC = () => {
-  const { tasks, moveTask } = useTaskStore();
-  const [isDialogOpen, setIsDialogOpen] = React.useState(false);
-  const [taskContent, setTaskContent] = React.useState('');
-  const [editingTask, setEditingTask] = React.useState<Task | null>(null);
+  const { tasks, fetchTasks, moveTask } = useTaskStore();
+
+  React.useEffect(() => {
+    fetchTasks();
+    console.log('tasks = ', tasks);
+  }, []);
 
   const handleDragStart = (
     e: React.DragEvent<HTMLDivElement>,
@@ -33,12 +35,6 @@ const Board: React.FC = () => {
     if (sourceList === targetList) return;
 
     moveTask(taskId, sourceList, targetList);
-  };
-
-  const handleAddTaskButton = () => {
-    setEditingTask(null);
-    setTaskContent('');
-    setIsDialogOpen(true);
   };
 
   return (
