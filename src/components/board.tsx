@@ -1,16 +1,13 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { AddDialog } from './add-dialog';
 import useTaskStore, { Task, TaskList } from '@/lib/store/task-store';
 
 const Board: React.FC = () => {
-  const { tasks, visibleTasks, moveTask, showMoreTasks, addTask } =
-    useTaskStore();
+  const { tasks, moveTask } = useTaskStore();
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
   const [taskContent, setTaskContent] = React.useState('');
   const [editingTask, setEditingTask] = React.useState<Task | null>(null);
-
 
   const handleDragStart = (
     e: React.DragEvent<HTMLDivElement>,
@@ -52,27 +49,24 @@ const Board: React.FC = () => {
           <AddDialog onAddTask={useTaskStore.getState().addTask} />
         </div>
 
-        <div className="flex gap-6 justify-center flex-1">
+        <div className="flex gap-6 justify-center flex-1 h-full">
           {(Object.entries(tasks) as [keyof TaskList, Task[]][]).map(
-            ([listName, listTasks]) => {
-              const displayedTasks = listTasks.slice(0, visibleTasks[listName]);
-              const hasMoreTasks = listTasks.length > visibleTasks[listName];
-
-              return (
-                <div
-                  key={listName}
-                  className="w-96 h-full"
-                  onDragOver={handleDragOver}
-                  onDrop={(e) => handleDrop(e, listName)}
-                >
-                  <Card className="bg-gray-50 h-full">
-                    <CardContent className="p-4 h-full flex flex-col">
-                      <h3 className="text-lg font-bold text-gray-700 capitalize mb-4">
-                        {listName} ({listTasks.length})
-                      </h3>
-                      <div className="flex-grow overflow-y-auto mb-4">
+            ([listName, listTasks]) => (
+              <div
+                key={listName}
+                className="w-96 h-full"
+                onDragOver={handleDragOver}
+                onDrop={(e) => handleDrop(e, listName)}
+              >
+                <Card className="h-full flex flex-col bg-gray-50">
+                  <CardContent className="flex flex-col h-full p-4">
+                    <h3 className="text-lg font-bold text-gray-700 capitalize mb-4 flex-shrink-0">
+                      {listName} ({listTasks.length})
+                    </h3>
+                    <div className="flex-1 min-h-0">
+                      <div className="h-full overflow-y-auto">
                         <div className="flex flex-col gap-2">
-                          {displayedTasks.map((task) => (
+                          {listTasks.map((task) => (
                             <div
                               key={task.id}
                               draggable
@@ -96,20 +90,11 @@ const Board: React.FC = () => {
                           ))}
                         </div>
                       </div>
-                      {hasMoreTasks && (
-                        <Button
-                          variant="outline"
-                          onClick={() => showMoreTasks(listName)}
-                          className="w-full"
-                        >
-                          Show More
-                        </Button>
-                      )}
-                    </CardContent>
-                  </Card>
-                </div>
-              );
-            }
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            )
           )}
         </div>
       </div>
