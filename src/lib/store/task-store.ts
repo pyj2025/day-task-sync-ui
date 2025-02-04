@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { supabase } from '@/lib/supabase';
 
 export type Task = {
   id: string;
@@ -17,6 +18,7 @@ interface TaskStore {
   visibleTasks: {
     [key in keyof TaskList]: number;
   };
+  fetchTasks: () => Promise<void>;
   addTask: (task: Omit<Task, 'id'>) => void;
   moveTask: (
     taskId: string,
@@ -33,32 +35,7 @@ const useTaskStore = create<TaskStore>()(
   persist(
     (set, get) => ({
       tasks: {
-        todo: [
-          { id: '1', content: 'Learn TypeScript', startDate: '2025-01-21' },
-          { id: '2', content: 'Build Drag & Drop', startDate: '2025-01-21' },
-          { id: '3', content: 'Study React Hooks', startDate: '2025-01-22' },
-          { id: '4', content: 'Create UI Components', startDate: '2025-01-22' },
-          { id: '5', content: 'Optimize Performance', startDate: '2025-01-23' },
-          { id: '6', content: 'Write Documentation', startDate: '2025-01-23' },
-          {
-            id: '7',
-            content: 'Design Database Schema',
-            startDate: '2025-01-24',
-          },
-          {
-            id: '8',
-            content: 'Implement Authentication',
-            startDate: '2025-01-24',
-          },
-          { id: '9', content: 'Setup CI/CD Pipeline', startDate: '2025-01-25' },
-          { id: '10', content: 'Create Test Cases', startDate: '2025-01-25' },
-          { id: '11', content: 'Review Code', startDate: '2025-01-26' },
-          {
-            id: '12',
-            content: 'Refactor Legacy Code',
-            startDate: '2025-01-26',
-          },
-        ],
+        todo: [],
         inProgress: [],
         done: [],
       },
@@ -67,19 +44,45 @@ const useTaskStore = create<TaskStore>()(
         inProgress: 7,
         done: 7,
       },
-      addTask: (task) =>
-        set((state) => ({
-          tasks: {
-            ...state.tasks,
-            todo: [
-              ...state.tasks.todo,
-              {
-                ...task,
-                id: Date.now().toString(),
-              },
-            ],
+      fetchTasks: async () => {
+        const { data: tasks, error } = await supabase
+          .from('tasks')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (error) {
+          console.error('Failed to fetchTasks:', error);
+          return;
+        }
+
+        const organizedTasks = tasks.reduce(
+          (acc, task) => {
+            acc[task.status].push(task);
+            return acc;
           },
-        })),
+          { todo: [], inProgress: [], done: [] } as TaskList
+        );
+
+        set({ tasks: organizedTasks });
+      },
+
+      addTask: async (task) => {
+        const { data, error } = await supabase.from('tasks').insert([
+          {
+            content: task.content,
+            start_date: task.startDate,
+            status: 'todo',
+            id: Math.random().toString(36).substr(2, 9),
+          },
+        ]);
+
+        if (error) {
+          console.error('태스크 추가 실패:', error);
+          return;
+        }
+
+        get().fetchTasks();
+      },
       moveTask: (
         taskId: string,
         sourceList: keyof TaskList,

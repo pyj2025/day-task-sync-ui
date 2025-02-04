@@ -4,7 +4,12 @@ import { AddDialog } from './add-dialog';
 import useTaskStore, { Task, TaskList } from '@/lib/store/task-store';
 
 const Board: React.FC = () => {
-  const { tasks, moveTask } = useTaskStore();
+  const { tasks, fetchTasks, moveTask } = useTaskStore();
+
+  React.useEffect(() => {
+    fetchTasks();
+    console.log('tasks = ', tasks);
+  }, []);
 
   const handleDragStart = (
     e: React.DragEvent<HTMLDivElement>,
