@@ -8,7 +8,6 @@ const Board: React.FC = () => {
 
   React.useEffect(() => {
     fetchTasks();
-    console.log('tasks = ', tasks);
   }, []);
 
   const handleDragStart = (

@@ -45,17 +45,14 @@ const useTaskStore = create<TaskStore>()(
         done: 7,
       },
       fetchTasks: async () => {
-        const { data: tasks, error } = await supabase
-          .from('tasks')
-          .select('*')
-          .order('created_at', { ascending: false });
+        const { data, error } = await supabase.from('Tasks').select('*');
 
         if (error) {
           console.error('Failed to fetchTasks:', error);
           return;
         }
 
-        const organizedTasks = tasks.reduce(
+        const organizedTasks = data.reduce(
           (acc, task) => {
             acc[task.status].push(task);
             return acc;
@@ -67,7 +64,7 @@ const useTaskStore = create<TaskStore>()(
       },
 
       addTask: async (task) => {
-        const { data, error } = await supabase.from('tasks').insert([
+        const { data, error } = await supabase.from('Tasks').insert([
           {
             content: task.content,
             start_date: task.startDate,
