@@ -1,13 +1,20 @@
 import React, { useState, useEffect } from 'react';
+import { IoMenu } from 'react-icons/io5';
+import { LogOut } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
 import Login from '@/components/login';
 import Calendar from '@/components/calendar';
 import Board from '@/components/board';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { LogOut } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 export default function Home() {
   const { user, isLoading } = useAuth();
@@ -71,7 +78,7 @@ export default function Home() {
                 </TabsTrigger>
               </TabsList>
             </Tabs>
-            <Button
+            {/* <Button
               onClick={handleLogout}
               variant="ghost"
               size="sm"
@@ -79,7 +86,27 @@ export default function Home() {
             >
               <LogOut className="h-5 w-5 mr-2" />
               Logout
-            </Button>
+            </Button> */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-gray-600 hover:text-gray-900"
+                >
+                  <IoMenu className="h-5 w-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48 bg-white">
+                <DropdownMenuItem
+                  onClick={handleLogout}
+                  className="text-red-600 focus:text-red-600 cursor-pointer"
+                >
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Logout
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </div>
