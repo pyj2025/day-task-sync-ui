@@ -74,10 +74,10 @@ const Board: React.FC = () => {
                                 {task.content}
                               </p>
                               <div className="mt-2 text-xs text-gray-500">
-                                <span>Start: {task.startDate}</span>
-                                {listName === 'done' && task.endDate && (
+                                <span>Start: {task.start_date}</span>
+                                {listName === 'done' && task.end_date && (
                                   <span className="ml-2">
-                                    End: {task.endDate}
+                                    End: {task.end_date}
                                   </span>
                                 )}
                               </div>
