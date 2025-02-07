@@ -95,7 +95,7 @@ const Calendar: React.FC = () => {
     } else {
       addTask({
         content: taskContent,
-        startDate: selectedDate,
+        start_date: selectedDate,
       });
     }
     setIsDialogOpen(false);

@@ -1,14 +1,33 @@
 import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { AddDialog } from './add-dialog';
+import { Pencil, Trash2 } from 'lucide-react';
 import useTaskStore, { Task, TaskList } from '@/lib/store/task-store';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import UpdateTaskDialog from './update-task-dialog';
 
 const Board: React.FC = () => {
-  const { tasks, fetchTasks, moveTask } = useTaskStore();
+  const { tasks, fetchTasks, moveTask, deleteTask, editTask } = useTaskStore();
+  const [editingTask, setEditingTask] = React.useState<Task | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = React.useState(false);
+  const [taskContent, setTaskContent] = React.useState('');
 
   React.useEffect(() => {
     fetchTasks();
   }, []);
+
+  const handleEditClick = (task: Task) => {
+    setEditingTask(task);
+    setTaskContent(task.content);
+    setIsDialogOpen(true);
+  };
+
+  const handleSaveTask = () => {
+    if (editingTask && taskContent.trim()) {
+      setIsDialogOpen(true);
+      setEditingTask(null);
+      setTaskContent('');
+    }
+  };
 
   const handleDragStart = (
     e: React.DragEvent<HTMLDivElement>,
@@ -36,12 +55,17 @@ const Board: React.FC = () => {
     moveTask(taskId, sourceList, targetList);
   };
 
+  const handleDelete = (taskId: string) => {
+    if (window.confirm('Are you sure you want to delete this task?')) {
+      deleteTask(taskId);
+    }
+  };
+
   return (
     <div className="h-[90vh] bg-gray-100 p-6">
       <div className="h-full max-w-7xl mx-auto flex flex-col">
         <div className="mb-6 flex items-center justify-between">
           <h2 className="text-2xl font-bold text-gray-800">Board</h2>
-          <AddDialog onAddTask={useTaskStore.getState().addTask} />
         </div>
 
         <div className="flex gap-6 justify-center flex-1 h-full">
@@ -68,18 +92,40 @@ const Board: React.FC = () => {
                               onDragStart={(e) =>
                                 handleDragStart(e, task.id, listName)
                               }
-                              className="p-4 bg-white border border-gray-200 rounded-lg shadow-sm cursor-move hover:shadow-md transition-shadow"
+                              className="p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow"
                             >
-                              <p className="text-sm font-medium text-gray-800">
-                                {task.content}
-                              </p>
-                              <div className="mt-2 text-xs text-gray-500">
-                                <span>Start: {task.start_date}</span>
-                                {listName === 'done' && task.end_date && (
-                                  <span className="ml-2">
-                                    End: {task.end_date}
-                                  </span>
-                                )}
+                              <div className="flex justify-between items-start">
+                                <div className="flex-1">
+                                  <p className="text-sm font-medium text-gray-800">
+                                    {task.content}
+                                  </p>
+                                  <div className="mt-2 text-xs text-gray-500">
+                                    <span>Start: {task.start_date}</span>
+                                    {listName === 'done' && task.end_date && (
+                                      <span className="ml-2">
+                                        End: {task.end_date}
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                                <div className="flex gap-2 ml-4">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-8 w-8 p-0"
+                                    onClick={() => handleEditClick(task)}
+                                  >
+                                    <Pencil className="h-4 w-4" />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                                    onClick={() => handleDelete(task.id)}
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </div>
                               </div>
                             </div>
                           ))}
@@ -93,6 +139,15 @@ const Board: React.FC = () => {
           )}
         </div>
       </div>
+
+      <UpdateTaskDialog
+        editingTask={editingTask}
+        isDialogOpen={isDialogOpen}
+        setIsDialogOpen={setIsDialogOpen}
+        taskContent={taskContent}
+        setTaskContent={setTaskContent}
+        saveTask={handleSaveTask}
+      />
     </div>
   );
 };
