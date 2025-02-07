@@ -5,8 +5,8 @@ import { supabase } from '@/lib/supabase';
 export type Task = {
   id: string;
   content: string;
-  startDate: string;
-  endDate?: string;
+  start_date: string;
+  end_date?: string;
 };
 
 export type TaskList = {
@@ -67,7 +67,7 @@ const useTaskStore = create<TaskStore>()(
         const { data, error } = await supabase.from('Tasks').insert([
           {
             content: task.content,
-            start_date: task.startDate,
+            start_date: task.start_date,
             status: 'todo',
             id: Math.random().toString(36).substr(2, 9),
           },
@@ -94,7 +94,7 @@ const useTaskStore = create<TaskStore>()(
 
           const updatedTask = { ...taskToMove };
           if (targetList === 'done') {
-            updatedTask.endDate = new Date().toISOString().split('T')[0];
+            updatedTask.end_date = new Date().toISOString().split('T')[0];
           }
 
           return {
@@ -155,7 +155,7 @@ const useTaskStore = create<TaskStore>()(
           ...get().tasks.inProgress,
           ...get().tasks.done,
         ];
-        return allTasks.filter((task) => task.startDate === date);
+        return allTasks.filter((task) => task.start_date === date);
       },
     }),
     {
