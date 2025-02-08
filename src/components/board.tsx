@@ -1,6 +1,7 @@
 import React from 'react';
 import { Pencil, Trash2 } from 'lucide-react';
-import useTaskStore, { Task, TaskList } from '@/lib/store/task-store';
+import useTaskStore from '@/lib/store/task-store';
+import { Task, TaskList } from '@/types/task';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import UpdateTaskDialog from './update-task-dialog';

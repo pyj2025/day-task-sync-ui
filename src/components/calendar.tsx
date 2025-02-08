@@ -5,8 +5,9 @@ import {
   AiOutlineRight,
   AiOutlinePlus,
 } from 'react-icons/ai';
-import useTaskStore, { Task } from '@/lib/store/task-store';
+import useTaskStore from '@/lib/store/task-store';
 import { WEEK_DAYS } from '@/lib/constants';
+import { Task } from '@/types/task';
 import { Button } from './ui/button';
 import DayCell from './day-cell';
 import TaskListDialog from './task-list-dialog';
