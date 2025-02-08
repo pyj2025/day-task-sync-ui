@@ -1,17 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { supabase } from '@/lib/supabase';
-
-export type Task = {
-  id: string;
-  content: string;
-  start_date: string;
-  end_date?: string;
-};
-
-export type TaskList = {
-  [key in 'todo' | 'inProgress' | 'done']: Task[];
-};
+import { Task, TaskList } from '@/types/task';
 
 interface TaskStore {
   tasks: TaskList;
@@ -49,10 +39,11 @@ const useTaskStore = create<TaskStore>()(
 
         if (error) {
           console.error('Failed to fetchTasks:', error);
+          set({ tasks: { todo: [], inProgress: [], done: [] } });
           return;
         }
 
-        const organizedTasks = data.reduce(
+        const fetchedTasks = data.reduce(
           (acc, task) => {
             acc[task.status].push(task);
             return acc;
@@ -60,7 +51,7 @@ const useTaskStore = create<TaskStore>()(
           { todo: [], inProgress: [], done: [] } as TaskList
         );
 
-        set({ tasks: organizedTasks });
+        set({ tasks: fetchedTasks });
       },
 
       addTask: async (task) => {
