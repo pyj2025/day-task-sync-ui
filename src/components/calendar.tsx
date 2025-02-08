@@ -121,7 +121,7 @@ const Calendar: React.FC = () => {
   const days = getDaysInMonth(currentDate);
 
   return (
-    <div className="w-full max-w-6xl mx-auto p-6 bg-gray-50 rounded-xl shadow-lg">
+    <div className="w-full max-w-6xl mx-auto p-4 bg-gray-50 rounded-xl shadow-lg">
       <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <AiOutlineCalendar className="h-6 w-6 text-gray-700" />
