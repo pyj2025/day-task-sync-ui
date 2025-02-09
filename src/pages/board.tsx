@@ -1,4 +1,4 @@
-import AuthGuard from '@/components/AuthGuard';
+import AuthGuard from '@/components/auth-guard';
 import Board from '@/components/board';
 
 export default function BoardPage() {
