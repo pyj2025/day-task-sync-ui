@@ -1,4 +1,4 @@
-import AuthGuard from '@/components/AuthGuard';
+import AuthGuard from '@/components/auth-guard';
 import Calendar from '@/components/calendar';
 
 export default function CalendarPage() {
