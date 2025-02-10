@@ -8,13 +8,9 @@ import Board from '@/components/board';
 
 interface HomeProps {
   activeComponent: string;
-  setActiveComponent: (component: string) => void;
 }
 
-export default function Home({
-  activeComponent,
-  setActiveComponent,
-}: HomeProps) {
+export default function Home({ activeComponent }: HomeProps) {
   const { user } = useAuth();
   const router = useRouter();
 
