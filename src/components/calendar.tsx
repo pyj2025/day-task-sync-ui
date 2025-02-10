@@ -191,7 +191,6 @@ const Calendar: React.FC = () => {
         setIsDialogOpen={setIsDialogOpen}
         taskContent={taskContent}
         setTaskContent={setTaskContent}
-        saveTask={handleSaveTask}
       />
       <TaskListDialog
         isTaskListDialogOpen={isTaskListDialogOpen}
