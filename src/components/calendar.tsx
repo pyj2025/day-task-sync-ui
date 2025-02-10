@@ -14,7 +14,7 @@ import TaskListDialog from './task-list-dialog';
 import UpdateTaskDialog from './update-task-dialog';
 
 const Calendar: React.FC = () => {
-  const { addTask, editTask } = useTaskStore();
+  const { tasks, addTask, editTask } = useTaskStore();
 
   const [mounted, setMounted] = useState(false);
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -199,6 +199,7 @@ const Calendar: React.FC = () => {
         selectedDayTasks={selectedDayTasks}
         setSelectedDayTasks={setSelectedDayTasks}
         handleEditTask={handleEditTask}
+        taskList={tasks}
       />
     </div>
   );
