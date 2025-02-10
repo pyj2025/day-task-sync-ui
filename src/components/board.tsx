@@ -1,5 +1,5 @@
 import React from 'react';
-import { Pencil, Trash2 } from 'lucide-react';
+import { Pencil, Trash2, Plus } from 'lucide-react';
 import useTaskStore from '@/lib/store/task-store';
 import { Task, TaskList } from '@/types/task';
 import { Card, CardContent } from '@/components/ui/card';
@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import UpdateTaskDialog from './update-task-dialog';
 
 const Board: React.FC = () => {
-  const { tasks, fetchTasks, moveTask, deleteTask, editTask } = useTaskStore();
+  const { tasks, fetchTasks, moveTask, deleteTask } = useTaskStore();
   const [editingTask, setEditingTask] = React.useState<Task | null>(null);
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
   const [taskContent, setTaskContent] = React.useState('');
@@ -22,43 +22,17 @@ const Board: React.FC = () => {
     setIsDialogOpen(true);
   };
 
+  const handleAddTaskClick = () => {
+    setEditingTask(null);
+    setTaskContent('');
+    setIsDialogOpen(true);
+  };
+
   const handleSaveTask = () => {
-    if (editingTask && taskContent.trim()) {
-      setIsDialogOpen(true);
+    if (taskContent.trim()) {
+      setIsDialogOpen(false);
       setEditingTask(null);
       setTaskContent('');
-    }
-  };
-
-  const handleDragStart = (
-    e: React.DragEvent<HTMLDivElement>,
-    id: string,
-    sourceList: keyof TaskList
-  ) => {
-    e.dataTransfer.setData('taskId', id);
-    e.dataTransfer.setData('sourceList', sourceList);
-  };
-
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-  };
-
-  const handleDrop = (
-    e: React.DragEvent<HTMLDivElement>,
-    targetList: keyof TaskList
-  ) => {
-    e.preventDefault();
-    const taskId = e.dataTransfer.getData('taskId');
-    const sourceList = e.dataTransfer.getData('sourceList') as keyof TaskList;
-
-    if (sourceList === targetList) return;
-
-    moveTask(taskId, sourceList, targetList);
-  };
-
-  const handleDelete = (taskId: string) => {
-    if (window.confirm('Are you sure you want to delete this task?')) {
-      deleteTask(taskId);
     }
   };
 
@@ -67,70 +41,55 @@ const Board: React.FC = () => {
       <div className="h-full max-w-7xl mx-auto flex flex-col">
         <div className="mb-6 flex items-center justify-between">
           <h2 className="text-2xl font-bold text-gray-800">Board</h2>
+          <Button
+            onClick={handleAddTaskClick}
+            className="bg-blue-500 hover:bg-blue-600 text-white flex items-center gap-2"
+          >
+            <Plus className="h-4 w-4" /> Add Task
+          </Button>
         </div>
 
         <div className="flex gap-6 justify-center flex-1 h-full">
           {(Object.entries(tasks) as [keyof TaskList, Task[]][]).map(
             ([listName, listTasks]) => (
-              <div
-                key={listName}
-                className="w-96 h-full"
-                onDragOver={handleDragOver}
-                onDrop={(e) => handleDrop(e, listName)}
-              >
+              <div key={listName} className="w-96 h-full">
                 <Card className="h-full flex flex-col bg-gray-50">
                   <CardContent className="flex flex-col h-full p-4">
-                    <h3 className="text-lg font-bold text-gray-700 capitalize mb-4 flex-shrink-0">
+                    <h3 className="text-lg font-bold text-gray-700 capitalize mb-4">
                       {listName} ({listTasks.length})
                     </h3>
-                    <div className="flex-1 min-h-0">
-                      <div className="h-full overflow-y-auto">
-                        <div className="flex flex-col gap-2">
-                          {listTasks.map((task) => (
-                            <div
-                              key={task.id}
-                              draggable
-                              onDragStart={(e) =>
-                                handleDragStart(e, task.id, listName)
-                              }
-                              className="p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow"
-                            >
-                              <div className="flex justify-between items-start">
-                                <div className="flex-1">
-                                  <p className="text-sm font-medium text-gray-800">
-                                    {task.content}
-                                  </p>
-                                  <div className="mt-2 text-xs text-gray-500">
-                                    <span>Start: {task.start_date}</span>
-                                    {listName === 'done' && task.end_date && (
-                                      <span className="ml-2">
-                                        End: {task.end_date}
-                                      </span>
-                                    )}
-                                  </div>
-                                </div>
-                                <div className="flex gap-2 ml-4">
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-8 w-8 p-0"
-                                    onClick={() => handleEditClick(task)}
-                                  >
-                                    <Pencil className="h-4 w-4" />
-                                  </Button>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
-                                    onClick={() => handleDelete(task.id)}
-                                  >
-                                    <Trash2 className="h-4 w-4" />
-                                  </Button>
-                                </div>
+                    <div className="flex-1 overflow-y-auto">
+                      <div className="flex flex-col gap-2">
+                        {listTasks.map((task) => (
+                          <div
+                            key={task.id}
+                            className="p-4 bg-white border rounded-lg shadow-sm hover:shadow-md"
+                          >
+                            <div className="flex justify-between items-start">
+                              <p className="text-sm font-medium text-gray-800">
+                                {task.content}
+                              </p>
+                              <div className="flex gap-2">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-8 w-8 p-0"
+                                  onClick={() => handleEditClick(task)}
+                                >
+                                  <Pencil className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+                                  onClick={() => deleteTask(task.id)}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
                               </div>
                             </div>
-                          ))}
-                        </div>
+                          </div>
+                        ))}
                       </div>
                     </div>
                   </CardContent>
