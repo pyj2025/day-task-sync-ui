@@ -104,9 +104,7 @@ const Board: React.FC = () => {
         editingTask={editingTask}
         isDialogOpen={isDialogOpen}
         setIsDialogOpen={setIsDialogOpen}
-        taskContent={taskContent}
-        setTaskContent={setTaskContent}
-        saveTask={handleSaveTask}
+        onSave={handleSaveTask}
       />
     </div>
   );
