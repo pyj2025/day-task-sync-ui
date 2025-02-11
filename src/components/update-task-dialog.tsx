@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Task } from '@/types/task';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { Button } from './ui/button';
@@ -14,31 +14,47 @@ interface UpdateTaskDialogProps {
   editingTask: Task | null;
   isDialogOpen: boolean;
   setIsDialogOpen: (open: boolean) => void;
-  taskContent: string;
-  setTaskContent: (content: string) => void;
-  taskStartDate: string;
-  setTaskStartDate: (date: string) => void;
-  taskEndDate: string;
-  setTaskEndDate: (date: string) => void;
-  taskStatus: string;
-  setTaskStatus: (status: string) => void;
-  saveTask: () => void;
+  onSave: (taskData: {
+    content: string;
+    startDate: string;
+    endDate: string;
+    status: string;
+  }) => void;
 }
 
 const UpdateTaskDialog: React.FC<UpdateTaskDialogProps> = ({
   editingTask,
   isDialogOpen,
   setIsDialogOpen,
-  taskContent,
-  setTaskContent,
-  taskStartDate,
-  setTaskStartDate,
-  taskEndDate,
-  setTaskEndDate,
-  taskStatus,
-  setTaskStatus,
-  saveTask,
+  onSave,
 }) => {
+  const [taskContent, setTaskContent] = useState('');
+  const [taskStartDate, setTaskStartDate] = useState('');
+  const [taskEndDate, setTaskEndDate] = useState('');
+  const [taskStatus, setTaskStatus] = useState('todo');
+
+  useEffect(() => {
+    if (editingTask) {
+      setTaskContent(editingTask.content);
+      setTaskStartDate(editingTask.start_date);
+    } else {
+      setTaskContent('');
+      setTaskStartDate('');
+      setTaskEndDate('');
+      setTaskStatus('todo');
+    }
+  }, [editingTask]);
+
+  const handleSave = () => {
+    onSave({
+      content: taskContent,
+      startDate: taskStartDate,
+      endDate: taskEndDate,
+      status: taskStatus,
+    });
+    setIsDialogOpen(false);
+  };
+
   return (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       <DialogContent className="bg-gray-50 border-0">
@@ -102,7 +118,7 @@ const UpdateTaskDialog: React.FC<UpdateTaskDialogProps> = ({
               Cancel
             </Button>
             <Button
-              onClick={saveTask}
+              onClick={handleSave}
               className="bg-blue-500 hover:bg-blue-600 text-white"
               disabled={!taskContent.trim() || !taskStartDate.trim()}
             >
