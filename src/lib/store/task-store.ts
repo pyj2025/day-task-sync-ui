@@ -9,13 +9,13 @@ interface TaskStore {
     [key in keyof TaskList]: number;
   };
   fetchTasks: () => Promise<void>;
-  addTask: (task: Omit<Task, 'id'>) => void;
-  moveTask: (
-    taskId: string,
-    sourceList: keyof TaskList,
-    targetList: keyof TaskList
-  ) => void;
-  showMoreTasks: (listName: keyof TaskList) => void;
+  addTask: (task: Task) => void;
+  // moveTask: (
+  //   taskId: string,
+  //   sourceList: keyof TaskList,
+  //   targetList: keyof TaskList
+  // ) => void;
+  // showMoreTasks: (listName: keyof TaskList) => void;
   editTask: (taskId: string, updatedTask: Partial<Task>) => void;
   deleteTask: (taskId: string) => void;
   getTasksByDate: (date: string) => Task[];
@@ -35,7 +35,7 @@ const useTaskStore = create<TaskStore>()(
         done: 7,
       },
       fetchTasks: async () => {
-        const { data, error } = await supabase.from('Tasks').select('*');
+        const { data, error } = await supabase.from('TasksList').select('*');
 
         if (error) {
           console.error('Failed to fetchTasks:', error);
@@ -55,54 +55,56 @@ const useTaskStore = create<TaskStore>()(
       },
 
       addTask: async (task) => {
-        const { data, error } = await supabase.from('Tasks').insert([
-          {
-            content: task.content,
-            start_date: task.start_date,
-            status: 'todo',
-            id: Math.random().toString(36).substr(2, 9),
-          },
-        ]);
+        console.log('task', task);
 
-        if (error) {
-          console.error('태스크 추가 실패:', error);
-          return;
-        }
+        // const { data, error } = await supabase.from('TasksList').insert([
+        //   {
+        //     content: task.content,
+        //     start_date: task.start_date,
+        //     status: 'todo',
+        //     id: Math.random().toString(36).substr(2, 9),
+        //   },
+        // ]);
+
+        // if (error) {
+        //   console.error('Failed to add Task:', error);
+        //   return;
+        // }
 
         get().fetchTasks();
       },
-      moveTask: (
-        taskId: string,
-        sourceList: keyof TaskList,
-        targetList: keyof TaskList
-      ) =>
-        set((state) => {
-          const sourceTasks = [...state.tasks[sourceList]];
-          const targetTasks = [...state.tasks[targetList]];
+      // moveTask: (
+      //   taskId: string,
+      //   sourceList: keyof TaskList,
+      //   targetList: keyof TaskList
+      // ) =>
+      //   set((state) => {
+      //     const sourceTasks = [...state.tasks[sourceList]];
+      //     const targetTasks = [...state.tasks[targetList]];
 
-          const taskToMove = sourceTasks.find((task) => task.id === taskId);
-          if (!taskToMove) return state;
+      //     const taskToMove = sourceTasks.find((task) => task.id === taskId);
+      //     if (!taskToMove) return state;
 
-          const updatedTask = { ...taskToMove };
-          if (targetList === 'done') {
-            updatedTask.end_date = new Date().toISOString().split('T')[0];
-          }
+      //     const updatedTask = { ...taskToMove };
+      //     if (targetList === 'done') {
+      //       updatedTask.end_date = new Date().toISOString().split('T')[0];
+      //     }
 
-          return {
-            tasks: {
-              ...state.tasks,
-              [sourceList]: sourceTasks.filter((task) => task.id !== taskId),
-              [targetList]: [...targetTasks, updatedTask],
-            },
-          };
-        }),
-      showMoreTasks: (listName: keyof TaskList) =>
-        set((state) => ({
-          visibleTasks: {
-            ...state.visibleTasks,
-            [listName]: state.visibleTasks[listName] + 7,
-          },
-        })),
+      //     return {
+      //       tasks: {
+      //         ...state.tasks,
+      //         [sourceList]: sourceTasks.filter((task) => task.id !== taskId),
+      //         [targetList]: [...targetTasks, updatedTask],
+      //       },
+      //     };
+      //   }),
+      // showMoreTasks: (listName: keyof TaskList) =>
+      //   set((state) => ({
+      //     visibleTasks: {
+      //       ...state.visibleTasks,
+      //       [listName]: state.visibleTasks[listName] + 7,
+      //     },
+      //   })),
       editTask: (taskId, updatedTask) =>
         set((state) => {
           const updatedTasks = Object.keys(state.tasks).reduce(

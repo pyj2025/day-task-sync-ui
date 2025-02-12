@@ -5,10 +5,13 @@ import { Task, TaskList } from '@/types/task';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import UpdateTaskDialog from './update-task-dialog';
+import CreateTaskDialog from './create-task-dialog';
 
 const Board: React.FC = () => {
-  const { tasks, fetchTasks, moveTask, deleteTask } = useTaskStore();
+  const { tasks, fetchTasks, deleteTask } = useTaskStore();
   const [editingTask, setEditingTask] = React.useState<Task | null>(null);
+
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = React.useState(false);
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
   const [taskContent, setTaskContent] = React.useState('');
 
@@ -19,12 +22,6 @@ const Board: React.FC = () => {
   const handleEditClick = (task: Task) => {
     setEditingTask(task);
     setTaskContent(task.content);
-    setIsDialogOpen(true);
-  };
-
-  const handleAddTaskClick = () => {
-    setEditingTask(null);
-    setTaskContent('');
     setIsDialogOpen(true);
   };
 
@@ -42,7 +39,7 @@ const Board: React.FC = () => {
         <div className="mb-6 flex items-center justify-between">
           <h2 className="text-2xl font-bold text-gray-800">Board</h2>
           <Button
-            onClick={handleAddTaskClick}
+            onClick={() => setIsCreateDialogOpen(true)}
             className="bg-blue-500 hover:bg-blue-600 text-white flex items-center gap-2"
           >
             <Plus className="h-4 w-4" /> Add Task
@@ -99,6 +96,12 @@ const Board: React.FC = () => {
           )}
         </div>
       </div>
+
+      <CreateTaskDialog
+        isDialogOpen={isCreateDialogOpen}
+        setIsDialogOpen={setIsCreateDialogOpen}
+        onSubmit={handleSaveTask}
+      />
 
       <UpdateTaskDialog
         editingTask={editingTask}
