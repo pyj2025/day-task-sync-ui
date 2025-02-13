@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
+import useTaskStore from '@/lib/store/task-store';
 
 export default function AuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
+  const setUserId = useTaskStore((state) => state.setUserId);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -31,6 +33,9 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
     } = supabase.auth.onAuthStateChange((event, session) => {
       if (!session) {
         router.push('/login');
+        setUserId(null);
+      } else {
+        setUserId(session.user.id);
       }
     });
 
