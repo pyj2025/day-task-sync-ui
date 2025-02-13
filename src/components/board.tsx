@@ -1,14 +1,16 @@
 import React from 'react';
 import { Pencil, Trash2, Plus } from 'lucide-react';
+import { v4 as uuidv4 } from 'uuid';
 import useTaskStore from '@/lib/store/task-store';
-import { Task, TaskList } from '@/types/task';
+import { Task, TaskFormSchemaType, TaskList } from '@/types/task';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import UpdateTaskDialog from './update-task-dialog';
 import CreateTaskDialog from './create-task-dialog';
+import { supabase } from '@/lib/supabase';
 
 const Board: React.FC = () => {
-  const { tasks, fetchTasks, deleteTask } = useTaskStore();
+  const { tasks, fetchTasks, addTask, deleteTask } = useTaskStore();
   const [editingTask, setEditingTask] = React.useState<Task | null>(null);
 
   const [isCreateDialogOpen, setIsCreateDialogOpen] = React.useState(false);
@@ -23,6 +25,25 @@ const Board: React.FC = () => {
     setEditingTask(task);
     setTaskContent(task.content);
     setIsDialogOpen(true);
+  };
+
+  const createTask = async (taskData: TaskFormSchemaType) => {
+    const { data, error } = await supabase.auth.getSession();
+
+    const userId = data.session?.user.id;
+
+    const formattedTask = {
+      id: uuidv4(),
+      content: taskData.content,
+      start_date: taskData.startDate,
+      end_date: taskData.endDate,
+      status: taskData.status,
+      user_id: userId,
+    };
+
+    // addTask(formattedTask as Task);
+
+    console.log(formattedTask);
   };
 
   const handleSaveTask = () => {
@@ -100,7 +121,7 @@ const Board: React.FC = () => {
       <CreateTaskDialog
         isDialogOpen={isCreateDialogOpen}
         setIsDialogOpen={setIsCreateDialogOpen}
-        onSubmit={handleSaveTask}
+        onSubmit={createTask}
       />
 
       <UpdateTaskDialog

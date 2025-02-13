@@ -2,8 +2,9 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { supabase } from '@/lib/supabase';
 import { Task, TaskList } from '@/types/task';
+import { UserState } from '@/types/user';
 
-interface TaskStore {
+interface TaskStore extends UserState {
   tasks: TaskList;
   visibleTasks: {
     [key in keyof TaskList]: number;
@@ -24,6 +25,8 @@ interface TaskStore {
 const useTaskStore = create<TaskStore>()(
   persist(
     (set, get) => ({
+      userId: null,
+      setUserId: (id: string | null) => set({ userId: id }),
       tasks: {
         todo: [],
         inProgress: [],
