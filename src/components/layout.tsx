@@ -15,6 +15,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Toaster } from '@/components/ui/sonner';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -119,6 +120,7 @@ export default function Layout({
       <main className="flex-1 min-h-0 w-full max-w-7xl mx-auto p-2">
         <div className="h-full">{children}</div>
       </main>
+      <Toaster />
     </div>
   );
 }

@@ -44,7 +44,6 @@ const CreateTaskDialog: React.FC<CreateTaskDialogProps> = ({
 
   const onSubmitForm = handleSubmit((data) => {
     onSubmit(data);
-    setIsDialogOpen(false);
     reset();
   });
 
