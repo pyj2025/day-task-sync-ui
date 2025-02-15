@@ -60,19 +60,21 @@ const useTaskStore = create<TaskStore>()(
       addTask: async (task) => {
         console.log('task', task);
 
-        // const { data, error } = await supabase.from('TasksList').insert([
-        //   {
-        //     content: task.content,
-        //     start_date: task.start_date,
-        //     status: 'todo',
-        //     id: Math.random().toString(36).substr(2, 9),
-        //   },
-        // ]);
+        const { data, error } = await supabase.from('TasksList').insert([
+          {
+            id: task.id,
+            user_id: task.user_id,
+            content: task.content,
+            start_date: task.start_date,
+            end_date: task.end_date,
+            status: task.status,
+          },
+        ]);
 
-        // if (error) {
-        //   console.error('Failed to add Task:', error);
-        //   return;
-        // }
+        if (error) {
+          console.error('Failed to add Task:', error);
+          return;
+        }
 
         get().fetchTasks();
       },
