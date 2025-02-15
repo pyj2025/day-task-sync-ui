@@ -1,6 +1,7 @@
 import React from 'react';
 import { Pencil, Trash2, Plus } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
+import { toast } from 'sonner';
 import useTaskStore from '@/lib/store/task-store';
 import { Task, TaskFormSchemaType, TaskList } from '@/types/task';
 import { Card, CardContent } from '@/components/ui/card';
@@ -28,20 +29,36 @@ const Board: React.FC = () => {
   };
 
   const createTask = async (taskData: TaskFormSchemaType) => {
-    const { data, error } = await supabase.auth.getSession();
+    toast.loading('Creating task...');
 
-    const userId = data.session?.user.id;
+    try {
+      const { data, error } = await supabase.auth.getSession();
 
-    const formattedTask = {
-      id: uuidv4(),
-      content: taskData.content,
-      start_date: taskData.startDate,
-      end_date: taskData.endDate === '' ? undefined : taskData.endDate,
-      status: taskData.status,
-      user_id: userId,
-    };
+      if (error) {
+        throw new Error('Failed to authenticate');
+      }
 
-    addTask(formattedTask as Task);
+      const userId = data.session?.user.id;
+
+      const formattedTask = {
+        id: uuidv4(),
+        content: taskData.content,
+        start_date: taskData.startDate,
+        end_date: taskData.endDate === '' ? undefined : taskData.endDate,
+        status: taskData.status,
+        user_id: userId,
+      };
+
+      addTask(formattedTask as Task);
+
+      toast.success('Task created successfully');
+    } catch (error) {
+      console.error('Failed to create task:', error);
+      toast.error('Failed to create task');
+    } finally {
+      toast.dismiss();
+      setIsCreateDialogOpen(false);
+    }
   };
 
   const handleSaveTask = () => {
