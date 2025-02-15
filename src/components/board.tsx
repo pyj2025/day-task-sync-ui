@@ -36,14 +36,12 @@ const Board: React.FC = () => {
       id: uuidv4(),
       content: taskData.content,
       start_date: taskData.startDate,
-      end_date: taskData.endDate,
+      end_date: taskData.endDate === '' ? undefined : taskData.endDate,
       status: taskData.status,
       user_id: userId,
     };
 
-    // addTask(formattedTask as Task);
-
-    console.log(formattedTask);
+    addTask(formattedTask as Task);
   };
 
   const handleSaveTask = () => {
