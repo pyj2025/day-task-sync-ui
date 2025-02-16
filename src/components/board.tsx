@@ -28,7 +28,7 @@ const Board: React.FC = () => {
     setIsDialogOpen(true);
   };
 
-  const createTask = async (taskData: TaskFormSchemaType) => {
+  const handleAddTask = async (item: TaskFormSchemaType) => {
     toast.loading('Creating task...');
 
     try {
@@ -42,10 +42,10 @@ const Board: React.FC = () => {
 
       const formattedTask = {
         id: uuidv4(),
-        content: taskData.content,
-        start_date: taskData.startDate,
-        end_date: taskData.endDate === '' ? undefined : taskData.endDate,
-        status: taskData.status,
+        content: item.content,
+        start_date: item.startDate,
+        end_date: item.endDate === '' ? undefined : item.endDate,
+        status: item.status,
         user_id: userId,
       };
 
@@ -58,6 +58,36 @@ const Board: React.FC = () => {
     } finally {
       toast.dismiss();
       setIsCreateDialogOpen(false);
+    }
+  };
+
+  const handleDeleteTask = async (item: Task) => {
+    toast.loading('Deleting task...');
+
+    try {
+      const { data, error } = await supabase.auth.getSession();
+
+      if (error) {
+        throw new Error('Failed to authenticate');
+      }
+
+      const userId = data.session?.user.id;
+
+      console.log('item', item);
+      console.log('userId', userId);
+
+      if (!userId || !item.user_id || item.user_id !== userId) {
+        throw new Error('Failed to authenticate');
+      }
+
+      deleteTask(item.id);
+
+      toast.success('Task deleted successfully');
+    } catch (error) {
+      console.error('Failed to delete task:', error);
+      toast.error('Failed to delete task');
+    } finally {
+      toast.dismiss();
     }
   };
 
@@ -115,7 +145,7 @@ const Board: React.FC = () => {
                                   variant="ghost"
                                   size="sm"
                                   className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
-                                  onClick={() => deleteTask(task.id)}
+                                  onClick={() => handleDeleteTask(task)}
                                 >
                                   <Trash2 className="h-4 w-4" />
                                 </Button>
@@ -136,7 +166,7 @@ const Board: React.FC = () => {
       <CreateTaskDialog
         isDialogOpen={isCreateDialogOpen}
         setIsDialogOpen={setIsCreateDialogOpen}
-        onSubmit={createTask}
+        onSubmit={handleAddTask}
       />
 
       <UpdateTaskDialog
