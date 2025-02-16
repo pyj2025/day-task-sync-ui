@@ -17,7 +17,7 @@ interface TaskStore extends UserState {
   //   targetList: keyof TaskList
   // ) => void;
   // showMoreTasks: (listName: keyof TaskList) => void;
-  editTask: (taskId: string, updatedTask: Partial<Task>) => void;
+  updateTask: (updatedTask: Task) => void;
   deleteTask: (taskId: string) => void;
   getTasksByDate: (date: string) => Task[];
 }
@@ -60,7 +60,7 @@ const useTaskStore = create<TaskStore>()(
       addTask: async (task) => {
         console.log('task', task);
 
-        const { data, error } = await supabase.from('TasksList').insert([
+        const { error } = await supabase.from('TasksList').insert([
           {
             id: task.id,
             user_id: task.user_id,
@@ -123,30 +123,21 @@ const useTaskStore = create<TaskStore>()(
       //       [listName]: state.visibleTasks[listName] + 7,
       //     },
       //   })),
-      editTask: (taskId, updatedTask) =>
-        set((state) => {
-          const updatedTasks = Object.keys(state.tasks).reduce(
-            (acc, listKey) => {
-              const list = listKey as keyof TaskList;
-              const taskIndex = state.tasks[list].findIndex(
-                (t) => t.id === taskId
-              );
+      updateTask: async (updatedTask) => {
+        const { id, ...rest } = updatedTask;
 
-              if (taskIndex !== -1) {
-                const newList = [...state.tasks[list]];
-                newList[taskIndex] = { ...newList[taskIndex], ...updatedTask };
-                acc[list] = newList;
-              } else {
-                acc[list] = state.tasks[list];
-              }
+        const { error } = await supabase
+          .from('TasksList')
+          .update(rest)
+          .eq('id', id);
 
-              return acc;
-            },
-            {} as TaskList
-          );
+        if (error) {
+          console.error('Failed to update Task:', error);
+          return;
+        }
 
-          return { tasks: updatedTasks };
-        }),
+        get().fetchTasks();
+      },
       getTasksByDate: (date) => {
         const allTasks = [
           ...get().tasks.todo,

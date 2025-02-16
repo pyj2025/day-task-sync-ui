@@ -1,4 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { use } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { TaskFormSchema, TaskFormSchemaType } from '@/types/task';
 import { Task } from '@/types/task';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { Button } from './ui/button';
@@ -14,90 +17,104 @@ interface UpdateTaskDialogProps {
   editingTask: Task | null;
   isDialogOpen: boolean;
   setIsDialogOpen: (open: boolean) => void;
-  onSave: (taskData: {
-    content: string;
-    startDate: string;
-    endDate: string;
-    status: string;
-  }) => void;
+  onSubmit: (taskData: Task) => void;
 }
 
 const UpdateTaskDialog: React.FC<UpdateTaskDialogProps> = ({
   editingTask,
   isDialogOpen,
   setIsDialogOpen,
-  onSave,
+  onSubmit,
 }) => {
-  const [taskContent, setTaskContent] = useState('');
-  const [taskStartDate, setTaskStartDate] = useState('');
-  const [taskEndDate, setTaskEndDate] = useState('');
-  const [taskStatus, setTaskStatus] = useState('todo');
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+    setValue,
+    watch,
+  } = useForm<TaskFormSchemaType>({
+    resolver: zodResolver(TaskFormSchema),
+    defaultValues: {
+      content: '',
+      startDate: '',
+      endDate: '',
+      status: 'todo',
+    },
+  });
 
-  useEffect(() => {
-    if (editingTask) {
-      setTaskContent(editingTask.content);
-      setTaskStartDate(editingTask.start_date);
-    } else {
-      setTaskContent('');
-      setTaskStartDate('');
-      setTaskEndDate('');
-      setTaskStatus('todo');
-    }
-  }, [editingTask]);
+  const status = watch('status');
 
-  const handleSave = () => {
-    onSave({
-      content: taskContent,
-      startDate: taskStartDate,
-      endDate: taskEndDate,
-      status: taskStatus,
-    });
-    setIsDialogOpen(false);
-  };
+  const onSubmitForm = handleSubmit((data: TaskFormSchemaType) => {
+    const formattedData = {
+      id: editingTask?.id || '',
+      user_id: editingTask?.user_id || '',
+      content: data.content,
+      start_date: data.startDate,
+      end_date: data.endDate === '' ? undefined : data.endDate,
+      status: data.status,
+    };
+
+    console.log('formattedData', formattedData);
+
+    onSubmit(formattedData);
+    reset();
+  });
 
   return (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       <DialogContent className="bg-gray-50 border-0">
         <DialogHeader>
-          <DialogTitle className="text-gray-800">
-            {editingTask ? 'Edit Task' : 'Add Task'}
-          </DialogTitle>
+          <DialogTitle className="text-gray-800">Edit Task</DialogTitle>
         </DialogHeader>
-        <div className="space-y-4">
+        <form onSubmit={onSubmitForm} className="space-y-4">
           <div>
             <label className="block text-gray-700">Task Description</label>
             <textarea
-              value={taskContent}
-              onChange={(e) => setTaskContent(e.target.value)}
+              {...register('content')}
               className="w-full min-h-[120px] p-3 border border-gray-200 rounded-lg 
-                      focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                      placeholder:text-gray-400 text-gray-700 bg-white"
+                              focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                              placeholder:text-gray-400 text-gray-700 bg-white"
               placeholder="Enter your task..."
             />
+            {errors.content && (
+              <p className="mt-1 text-sm text-red-500">
+                {errors.content.message}
+              </p>
+            )}
           </div>
+
           <div>
             <label className="block text-gray-700">Start Date</label>
             <input
               type="date"
-              value={taskStartDate}
-              onChange={(e) => setTaskStartDate(e.target.value)}
+              {...register('startDate')}
               className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Start Date"
             />
+            {errors.startDate && (
+              <p className="mt-1 text-sm text-red-500">
+                {errors.startDate.message}
+              </p>
+            )}
           </div>
+
           <div>
             <label className="block text-gray-700">End Date</label>
             <input
               type="date"
-              value={taskEndDate}
-              onChange={(e) => setTaskEndDate(e.target.value)}
+              {...register('endDate')}
               className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="End Date"
             />
           </div>
+
           <div>
             <label className="block text-gray-700">Status</label>
-            <Select value={taskStatus} onValueChange={setTaskStatus}>
+            <Select
+              value={status}
+              onValueChange={(value) =>
+                setValue('status', value as 'todo' | 'inProgress' | 'done')
+              }
+            >
               <SelectTrigger className="w-full bg-white p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                 <SelectValue placeholder="Select status" />
               </SelectTrigger>
@@ -111,21 +128,24 @@ const UpdateTaskDialog: React.FC<UpdateTaskDialogProps> = ({
 
           <div className="flex justify-end gap-2">
             <Button
+              type="button"
               variant="outline"
-              onClick={() => setIsDialogOpen(false)}
+              onClick={() => {
+                setIsDialogOpen(false);
+                reset();
+              }}
               className="hover:bg-gray-100"
             >
               Cancel
             </Button>
             <Button
-              onClick={handleSave}
+              type="submit"
               className="bg-blue-500 hover:bg-blue-600 text-white"
-              disabled={!taskContent.trim() || !taskStartDate.trim()}
             >
-              Save
+              Update Task
             </Button>
           </div>
-        </div>
+        </form>
       </DialogContent>
     </Dialog>
   );

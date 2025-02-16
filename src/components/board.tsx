@@ -2,16 +2,16 @@ import React from 'react';
 import { Pencil, Trash2, Plus } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 import { toast } from 'sonner';
+import { supabase } from '@/lib/supabase';
 import useTaskStore from '@/lib/store/task-store';
 import { Task, TaskFormSchemaType, TaskList } from '@/types/task';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import UpdateTaskDialog from './update-task-dialog';
 import CreateTaskDialog from './create-task-dialog';
-import { supabase } from '@/lib/supabase';
 
 const Board: React.FC = () => {
-  const { tasks, fetchTasks, addTask, deleteTask } = useTaskStore();
+  const { tasks, fetchTasks, addTask, deleteTask, updateTask } = useTaskStore();
   const [editingTask, setEditingTask] = React.useState<Task | null>(null);
 
   const [isCreateDialogOpen, setIsCreateDialogOpen] = React.useState(false);
@@ -73,9 +73,6 @@ const Board: React.FC = () => {
 
       const userId = data.session?.user.id;
 
-      console.log('item', item);
-      console.log('userId', userId);
-
       if (!userId || !item.user_id || item.user_id !== userId) {
         throw new Error('Failed to authenticate');
       }
@@ -91,11 +88,30 @@ const Board: React.FC = () => {
     }
   };
 
-  const handleSaveTask = () => {
-    if (taskContent.trim()) {
-      setIsDialogOpen(false);
-      setEditingTask(null);
-      setTaskContent('');
+  const handleUpdateTask = async (item: Task) => {
+    toast.loading('Updating task...');
+
+    try {
+      const { data, error } = await supabase.auth.getSession();
+
+      if (error) {
+        throw new Error('Failed to authenticate');
+      }
+
+      const userId = data.session?.user.id;
+
+      if (!userId || !item.user_id || item.user_id !== userId) {
+        throw new Error('Failed to authenticate');
+      }
+
+      updateTask(item);
+
+      toast.success('Task updated successfully');
+    } catch (error) {
+      console.error('Failed to update task:', error);
+      toast.error('Failed to update task');
+    } finally {
+      toast.dismiss();
     }
   };
 
@@ -173,7 +189,7 @@ const Board: React.FC = () => {
         editingTask={editingTask}
         isDialogOpen={isDialogOpen}
         setIsDialogOpen={setIsDialogOpen}
-        onSave={handleSaveTask}
+        onSubmit={handleUpdateTask}
       />
     </div>
   );
