@@ -78,6 +78,19 @@ const useTaskStore = create<TaskStore>()(
 
         get().fetchTasks();
       },
+      deleteTask: async (taskId) => {
+        const { error } = await supabase
+          .from('TasksList')
+          .delete()
+          .match({ id: taskId });
+
+        if (error) {
+          console.error('Failed to delete Task:', error);
+          return;
+        }
+
+        get().fetchTasks();
+      },
       // moveTask: (
       //   taskId: string,
       //   sourceList: keyof TaskList,
@@ -127,19 +140,6 @@ const useTaskStore = create<TaskStore>()(
                 acc[list] = state.tasks[list];
               }
 
-              return acc;
-            },
-            {} as TaskList
-          );
-
-          return { tasks: updatedTasks };
-        }),
-      deleteTask: (taskId) =>
-        set((state) => {
-          const updatedTasks = Object.keys(state.tasks).reduce(
-            (acc, listKey) => {
-              const list = listKey as keyof TaskList;
-              acc[list] = state.tasks[list].filter((t) => t.id !== taskId);
               return acc;
             },
             {} as TaskList
