@@ -58,8 +58,6 @@ const useTaskStore = create<TaskStore>()(
       },
 
       addTask: async (task) => {
-        console.log('task', task);
-
         const { error } = await supabase.from('TasksList').insert([
           {
             id: task.id,
