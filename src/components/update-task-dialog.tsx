@@ -45,6 +45,15 @@ const UpdateTaskDialog: React.FC<UpdateTaskDialogProps> = ({
 
   const status = watch('status');
 
+  React.useEffect(() => {
+    if (editingTask) {
+      setValue('content', editingTask.content);
+      setValue('startDate', editingTask.start_date);
+      setValue('endDate', editingTask.end_date || '');
+      setValue('status', editingTask.status);
+    }
+  }, [editingTask, setValue]);
+
   const onSubmitForm = handleSubmit((data: TaskFormSchemaType) => {
     const formattedData = {
       id: editingTask?.id || '',
