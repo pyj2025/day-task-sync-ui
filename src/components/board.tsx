@@ -16,7 +16,7 @@ const Board: React.FC = () => {
   const { tasks, fetchTasks, addTask, deleteTask, updateTask } = useTaskStore();
   const [editingTask, setEditingTask] = React.useState<Task | null>(null);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = React.useState(false);
-  const [isDialogOpen, setIsDialogOpen] = React.useState(false);
+  const [isUpdateDialogOpen, setIsUpdateDialogOpen] = React.useState(false);
 
   React.useEffect(() => {
     fetchTasks();
@@ -24,7 +24,7 @@ const Board: React.FC = () => {
 
   const handleEditClick = (task: Task) => {
     setEditingTask(task);
-    setIsDialogOpen(true);
+    setIsUpdateDialogOpen(true);
   };
 
   const handleAddTask = async (item: TaskFormSchemaType) => {
@@ -108,6 +108,7 @@ const Board: React.FC = () => {
       toast.error('Failed to update task');
     } finally {
       toast.dismiss();
+      setIsUpdateDialogOpen(false);
     }
   };
 
@@ -184,8 +185,8 @@ const Board: React.FC = () => {
 
       <UpdateTaskDialog
         editingTask={editingTask}
-        isDialogOpen={isDialogOpen}
-        setIsDialogOpen={setIsDialogOpen}
+        isDialogOpen={isUpdateDialogOpen}
+        setIsDialogOpen={setIsUpdateDialogOpen}
         onSubmit={handleUpdateTask}
       />
     </div>
