@@ -10,12 +10,7 @@ interface TaskListProps {
   tasks: Task[];
   onEdit: (task: Task) => void;
   onDelete: (task: Task) => void;
-  onMove: (
-    dragIndex: number,
-    hoverIndex: number,
-    sourceList: string,
-    targetList: string
-  ) => void;
+  onMove: (id: string, sourceList: string, targetList: string) => void;
 }
 
 const TaskList: React.FC<TaskListProps> = ({
@@ -31,9 +26,7 @@ const TaskList: React.FC<TaskListProps> = ({
     accept: TaskItemTypes.TASK,
     drop: (item: any) => {
       if (item.listName !== listName) {
-        console.log('!!!!! item===== ', item);
-
-        onMove(item.index, tasks.length, item.listName, listName);
+        onMove(item.id, item.listName, listName);
       }
     },
   });

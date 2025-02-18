@@ -11,12 +11,7 @@ interface TaskItemProps {
   listName: string;
   onEdit: (task: Task) => void;
   onDelete: (task: Task) => void;
-  onMove: (
-    dragIndex: number,
-    hoverIndex: number,
-    sourceList: string,
-    targetList: string
-  ) => void;
+  onMove: (id: string, sourceList: string, targetList: string) => void;
 }
 
 const TaskItem: React.FC<TaskItemProps> = ({
@@ -50,7 +45,7 @@ const TaskItem: React.FC<TaskItemProps> = ({
 
       if (dragIndex === hoverIndex && sourceList === targetList) return;
 
-      onMove(dragIndex, hoverIndex, sourceList, targetList);
+      onMove(item.id, sourceList, targetList);
       item.index = hoverIndex;
       item.listName = targetList;
     },

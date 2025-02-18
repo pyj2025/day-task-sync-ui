@@ -112,17 +112,37 @@ const Board: React.FC = () => {
   };
 
   const handleMoveTask = (
-    dragIndex: number,
-    hoverIndex: number,
+    id: string,
     sourceList: string,
     targetList: string
   ) => {
-    console.log('Moving task:', {
-      dragIndex,
-      hoverIndex,
-      sourceList,
-      targetList,
-    });
+    try {
+      const selectedTask = tasks[sourceList as keyof TaskListType].find(
+        (task) => task.id === id
+      );
+
+      if (!selectedTask) {
+        throw new Error('Failed to find task');
+      }
+
+      const formattedData = {
+        id: id,
+        user_id: selectedTask?.user_id || '',
+        content: selectedTask.content,
+        start_date: selectedTask.start_date,
+        end_date:
+          selectedTask.end_date === '' ? undefined : selectedTask.end_date,
+        status: targetList as keyof TaskListType,
+      };
+
+      updateTask(formattedData);
+      toast.success('Task moved successfully');
+    } catch (error) {
+      console.error('Failed to move task:', error);
+      toast.error('Failed to move task');
+    } finally {
+      toast.dismiss();
+    }
   };
 
   return (
