@@ -11,7 +11,7 @@ export type Task = {
   user_id: string;
 };
 
-export type TaskList = {
+export type TaskListType = {
   todo: Task[];
   inProgress: Task[];
   done: Task[];

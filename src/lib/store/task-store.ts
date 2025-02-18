@@ -1,13 +1,13 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { supabase } from '@/lib/supabase';
-import { Task, TaskList } from '@/types/task';
+import { Task, TaskListType } from '@/types/task';
 import { UserState } from '@/types/user';
 
 interface TaskStore extends UserState {
-  tasks: TaskList;
+  tasks: TaskListType;
   visibleTasks: {
-    [key in keyof TaskList]: number;
+    [key in keyof TaskListType]: number;
   };
   fetchTasks: () => Promise<void>;
   addTask: (task: Task) => void;
@@ -51,7 +51,7 @@ const useTaskStore = create<TaskStore>()(
             acc[task.status].push(task);
             return acc;
           },
-          { todo: [], inProgress: [], done: [] } as TaskList
+          { todo: [], inProgress: [], done: [] } as TaskListType
         );
 
         set({ tasks: fetchedTasks });
