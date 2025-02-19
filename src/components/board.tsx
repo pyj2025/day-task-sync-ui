@@ -8,9 +8,9 @@ import { supabase } from '@/lib/supabase';
 import useTaskStore from '@/lib/store/task-store';
 import { Task, TaskFormSchemaType, TaskListType } from '@/types/task';
 import { Button } from '@/components/ui/button';
-import UpdateTaskDialog from './update-task-dialog';
-import CreateTaskDialog from './create-task-dialog';
 import TaskList from './task-list';
+import CreateTaskDialog from './dialog/create-task-dialog';
+import UpdateTaskDialog from './dialog/update-task-dialog';
 
 const Board: React.FC = () => {
   const { tasks, fetchTasks, addTask, deleteTask, updateTask } = useTaskStore();

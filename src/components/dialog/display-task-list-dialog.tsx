@@ -1,7 +1,7 @@
 import React from 'react';
 import { AiOutlineClose, AiOutlineEdit } from 'react-icons/ai';
-import { Task, TaskList } from '@/types/task';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
+import { Task, TaskListType } from '@/types/task';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
 
 const formatDate = (date: Date) => {
   return date.toLocaleDateString('en-US', {
@@ -17,26 +17,25 @@ type SelectedDayTasks = {
   tasks: Task[];
 } | null;
 
-interface TaskListDialogProps {
+interface DisplayTaskListDialogProps {
   isTaskListDialogOpen: boolean;
   setIsTaskListDialogOpen: (open: boolean) => void;
   selectedDayTasks: SelectedDayTasks;
   setSelectedDayTasks: React.Dispatch<React.SetStateAction<SelectedDayTasks>>;
   handleEditTask: (task: Task) => void;
-  taskList: TaskList;
+  taskList: TaskListType;
 }
 
-const TaskListDialog: React.FC<TaskListDialogProps> = ({
+const DisplayTaskListDialog: React.FC<DisplayTaskListDialogProps> = ({
   isTaskListDialogOpen,
   setIsTaskListDialogOpen,
   selectedDayTasks,
   setSelectedDayTasks,
   handleEditTask,
   taskList,
-}: TaskListDialogProps) => {
+}: DisplayTaskListDialogProps) => {
   const currentDate = selectedDayTasks?.date.toISOString().split('T')[0];
 
-  // 선택된 날짜의 작업만 필터링
   const groupedTasks = {
     todo: taskList.todo.filter((task) => task.start_date === currentDate),
     inProgress: taskList.inProgress.filter(
@@ -137,4 +136,4 @@ const TaskListDialog: React.FC<TaskListDialogProps> = ({
   );
 };
 
-export default TaskListDialog;
+export default DisplayTaskListDialog;
