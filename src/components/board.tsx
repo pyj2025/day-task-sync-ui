@@ -16,7 +16,7 @@ const Board: React.FC = () => {
   const { tasks, fetchTasks, addTask, deleteTask, updateTask } = useTaskStore();
   const [editingTask, setEditingTask] = React.useState<Task | null>(null);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = React.useState(false);
-  const [isDialogOpen, setIsDialogOpen] = React.useState(false);
+  const [isUpdateDialogOpen, setIsUpdateDialogOpen] = React.useState(false);
 
   React.useEffect(() => {
     fetchTasks();
@@ -24,7 +24,7 @@ const Board: React.FC = () => {
 
   const handleEditClick = (task: Task) => {
     setEditingTask(task);
-    setIsDialogOpen(true);
+    setIsUpdateDialogOpen(true);
   };
 
   const handleAddTask = async (item: TaskFormSchemaType) => {
@@ -108,6 +108,7 @@ const Board: React.FC = () => {
       toast.error('Failed to update task');
     } finally {
       toast.dismiss();
+      setIsUpdateDialogOpen(false);
     }
   };
 
@@ -159,7 +160,7 @@ const Board: React.FC = () => {
         </div>
 
         <DndProvider backend={HTML5Backend}>
-          <div className="flex gap-6 justify-center flex-1 h-full">
+          <div className="flex gap-6 justify-center flex-1 h-full max-h-full overflow-auto">
             {(Object.entries(tasks) as [keyof TaskListType, Task[]][]).map(
               ([listName, listTasks]) => (
                 <TaskList
@@ -184,8 +185,8 @@ const Board: React.FC = () => {
 
       <UpdateTaskDialog
         editingTask={editingTask}
-        isDialogOpen={isDialogOpen}
-        setIsDialogOpen={setIsDialogOpen}
+        isDialogOpen={isUpdateDialogOpen}
+        setIsDialogOpen={setIsUpdateDialogOpen}
         onSubmit={handleUpdateTask}
       />
     </div>
