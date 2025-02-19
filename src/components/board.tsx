@@ -160,7 +160,7 @@ const Board: React.FC = () => {
         </div>
 
         <DndProvider backend={HTML5Backend}>
-          <div className="flex gap-6 justify-center flex-1 h-full">
+          <div className="flex gap-6 justify-center flex-1 h-full max-h-full overflow-auto">
             {(Object.entries(tasks) as [keyof TaskListType, Task[]][]).map(
               ([listName, listTasks]) => (
                 <TaskList
