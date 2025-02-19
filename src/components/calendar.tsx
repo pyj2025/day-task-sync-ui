@@ -1,62 +1,53 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   AiOutlineCalendar,
   AiOutlineLeft,
   AiOutlineRight,
   AiOutlinePlus,
 } from 'react-icons/ai';
+import {
+  startOfMonth,
+  endOfMonth,
+  startOfWeek,
+  endOfWeek,
+  eachDayOfInterval,
+  format,
+  subMonths,
+  addMonths,
+  isSameMonth,
+} from 'date-fns';
 import useTaskStore from '@/lib/store/task-store';
 import { WEEK_DAYS } from '@/lib/constants';
 import { Task } from '@/types/task';
 import { Button } from './ui/button';
 import DayCell from './day-cell';
-import TaskListDialog from './task-list-dialog';
-import UpdateTaskDialog from './update-task-dialog';
+import UpdateTaskDialog from './dialog/update-task-dialog';
+import DisplayTaskListDialog from './dialog/display-task-list-dialog';
 
 const Calendar: React.FC = () => {
-  const { tasks, addTask, editTask } = useTaskStore();
+  const { tasks, addTask } = useTaskStore();
 
   const [mounted, setMounted] = useState(false);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<string>('');
   const [editingTask, setEditingTask] = useState<Task | null>(null);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isTaskListDialogOpen, setIsTaskListDialogOpen] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
+  const [isDisplayTaskListDialogOpen, setIsDisplayTaskListDialogOpen] =
+    useState<boolean>(false);
   const [taskContent, setTaskContent] = useState('');
   const [selectedDayTasks, setSelectedDayTasks] = useState<{
     date: Date;
     tasks: Task[];
   } | null>(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     setMounted(true);
   }, []);
 
   const getDaysInMonth = (date: Date) => {
-    const year = date.getFullYear();
-    const month = date.getMonth();
-    const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month + 1, 0);
-
-    const days: Date[] = [];
-
-    const prevMonthLastDate = new Date(year, month, 0);
-    const prevMonthLastDay = prevMonthLastDate.getDate();
-
-    for (let i = firstDay.getDay(); i > 0; i--) {
-      days.push(new Date(year, month - 1, prevMonthLastDay - i + 1));
-    }
-
-    for (let i = 1; i <= lastDay.getDate(); i++) {
-      days.push(new Date(year, month, i));
-    }
-
-    const remainingDays = 42 - days.length;
-    for (let i = 1; i <= remainingDays; i++) {
-      days.push(new Date(year, month + 1, i));
-    }
-
-    return days;
+    const start = startOfWeek(startOfMonth(date));
+    const end = endOfWeek(endOfMonth(date));
+    return eachDayOfInterval({ start, end });
   };
 
   if (!mounted) {
@@ -64,15 +55,11 @@ const Calendar: React.FC = () => {
   }
 
   const handlePreviousMonth = () => {
-    setCurrentDate(
-      new Date(currentDate.getFullYear(), currentDate.getMonth() - 1)
-    );
+    setCurrentDate(subMonths(currentDate, 1));
   };
 
   const handleNextMonth = () => {
-    setCurrentDate(
-      new Date(currentDate.getFullYear(), currentDate.getMonth() + 1)
-    );
+    setCurrentDate(addMonths(currentDate, 1));
   };
 
   const handleAddTask = (date: string) => {
@@ -88,30 +75,30 @@ const Calendar: React.FC = () => {
     setIsDialogOpen(true);
   };
 
-  const handleSaveTask = () => {
-    if (editingTask) {
-      editTask(editingTask.id, {
-        content: taskContent,
-      });
-    } else {
-      addTask({
-        content: taskContent,
-        start_date: selectedDate,
-      });
-    }
-    setIsDialogOpen(false);
-    setTaskContent('');
-    setEditingTask(null);
-  };
+  // const handleSaveTask = () => {
+  //   if (editingTask) {
+  //     editTask(editingTask.id, {
+  //       content: taskContent,
+  //     });
+  //   } else {
+  //     addTask({
+  //       content: taskContent,
+  //       start_date: selectedDate,
+  //     });
+  //   }
+  //   setIsDialogOpen(false);
+  //   setTaskContent('');
+  //   setEditingTask(null);
+  // };
 
   const handleDayClick = (date: Date, tasks: Task[]) => {
     setSelectedDayTasks({ date, tasks });
-    setIsTaskListDialogOpen(true);
+    setIsDisplayTaskListDialogOpen(true);
   };
 
   const handleAddTaskButton = () => {
     const today = new Date();
-    const formattedDate = today.toISOString().split('T')[0];
+    const formattedDate = format(today, 'yyyy-MM-dd');
     setSelectedDate(formattedDate);
     setEditingTask(null);
     setTaskContent('');
@@ -126,10 +113,7 @@ const Calendar: React.FC = () => {
         <div className="flex items-center gap-3">
           <AiOutlineCalendar className="h-6 w-6 text-gray-700" />
           <h2 className="text-2xl font-semibold text-gray-800">
-            {currentDate.toLocaleString('default', {
-              month: 'long',
-              year: 'numeric',
-            })}
+            {format(currentDate, 'MMMM yyyy')}
           </h2>
         </div>
         <div className="flex gap-2">
@@ -168,16 +152,15 @@ const Calendar: React.FC = () => {
           </div>
         ))}
         {days.map((date, index) => {
-          const tasks = useTaskStore
-            .getState()
-            .getTasksByDate(date.toISOString().split('T')[0]);
+          const taskDate = format(date, 'yyyy-MM-dd');
+          const tasks = useTaskStore.getState().getTasksByDate(taskDate);
 
           return (
             <DayCell
               key={index}
               date={date}
               tasks={tasks}
-              isCurrentMonth={date.getMonth() === currentDate.getMonth()}
+              isCurrentMonth={isSameMonth(date, currentDate)}
               onAddTask={handleAddTask}
               onEditTask={handleEditTask}
               onDayClick={handleDayClick}
@@ -189,12 +172,11 @@ const Calendar: React.FC = () => {
         editingTask={editingTask}
         isDialogOpen={isDialogOpen}
         setIsDialogOpen={setIsDialogOpen}
-        taskContent={taskContent}
-        setTaskContent={setTaskContent}
+        onSubmit={(taskData: Task) => console.log(taskData)}
       />
-      <TaskListDialog
-        isTaskListDialogOpen={isTaskListDialogOpen}
-        setIsTaskListDialogOpen={setIsTaskListDialogOpen}
+      <DisplayTaskListDialog
+        isTaskListDialogOpen={isDisplayTaskListDialogOpen}
+        setIsTaskListDialogOpen={setIsDisplayTaskListDialogOpen}
         selectedDayTasks={selectedDayTasks}
         setSelectedDayTasks={setSelectedDayTasks}
         handleEditTask={handleEditTask}

@@ -1,27 +1,24 @@
-import React, { use } from 'react';
+import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { TaskFormSchema, TaskFormSchemaType } from '@/types/task';
-import { Task } from '@/types/task';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
-import { Button } from './ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
+import { Button } from '../ui/button';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from './ui/select';
+} from '../ui/select';
 
-interface UpdateTaskDialogProps {
-  editingTask: Task | null;
+interface CreateTaskDialogProps {
   isDialogOpen: boolean;
   setIsDialogOpen: (open: boolean) => void;
-  onSubmit: (taskData: Task) => void;
+  onSubmit: (taskData: TaskFormSchemaType) => void;
 }
 
-const UpdateTaskDialog: React.FC<UpdateTaskDialogProps> = ({
-  editingTask,
+const CreateTaskDialog: React.FC<CreateTaskDialogProps> = ({
   isDialogOpen,
   setIsDialogOpen,
   onSubmit,
@@ -45,28 +42,8 @@ const UpdateTaskDialog: React.FC<UpdateTaskDialogProps> = ({
 
   const status = watch('status');
 
-  React.useEffect(() => {
-    if (editingTask) {
-      setValue('content', editingTask.content);
-      setValue('startDate', editingTask.start_date);
-      setValue('endDate', editingTask.end_date || '');
-      setValue('status', editingTask.status);
-    }
-  }, [editingTask, setValue]);
-
-  const onSubmitForm = handleSubmit((data: TaskFormSchemaType) => {
-    const formattedData = {
-      id: editingTask?.id || '',
-      user_id: editingTask?.user_id || '',
-      content: data.content,
-      start_date: data.startDate,
-      end_date: data.endDate === '' ? undefined : data.endDate,
-      status: data.status,
-    };
-
-    console.log('formattedData', formattedData);
-
-    onSubmit(formattedData);
+  const onSubmitForm = handleSubmit((data) => {
+    onSubmit(data);
     reset();
   });
 
@@ -74,7 +51,7 @@ const UpdateTaskDialog: React.FC<UpdateTaskDialogProps> = ({
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       <DialogContent className="bg-gray-50 border-0">
         <DialogHeader>
-          <DialogTitle className="text-gray-800">Edit Task</DialogTitle>
+          <DialogTitle className="text-gray-800">Add New Task</DialogTitle>
         </DialogHeader>
         <form onSubmit={onSubmitForm} className="space-y-4">
           <div>
@@ -82,8 +59,8 @@ const UpdateTaskDialog: React.FC<UpdateTaskDialogProps> = ({
             <textarea
               {...register('content')}
               className="w-full min-h-[120px] p-3 border border-gray-200 rounded-lg 
-                              focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                              placeholder:text-gray-400 text-gray-700 bg-white"
+                      focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                      placeholder:text-gray-400 text-gray-700 bg-white"
               placeholder="Enter your task..."
             />
             {errors.content && (
@@ -151,7 +128,7 @@ const UpdateTaskDialog: React.FC<UpdateTaskDialogProps> = ({
               type="submit"
               className="bg-blue-500 hover:bg-blue-600 text-white"
             >
-              Update Task
+              Create Task
             </Button>
           </div>
         </form>
@@ -160,4 +137,4 @@ const UpdateTaskDialog: React.FC<UpdateTaskDialogProps> = ({
   );
 };
 
-export default UpdateTaskDialog;
+export default CreateTaskDialog;
