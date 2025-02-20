@@ -1,16 +1,11 @@
 import React from 'react';
-import { AiOutlineClose, AiOutlineEdit } from 'react-icons/ai';
+import { format } from 'date-fns';
+import { AiOutlineClose, AiOutlineDelete, AiOutlineEdit } from 'react-icons/ai';
 import { Task, TaskListType } from '@/types/task';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
+import DisplayTaskDetailsDialog from './display-task-details-dialog';
 
-const formatDate = (date: Date) => {
-  return date.toLocaleDateString('en-US', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
-};
+const formatDate = (date: Date) => format(date, 'EEEE, MMMM d, yyyy');
 
 type SelectedDayTasks = {
   date: Date;
@@ -34,6 +29,10 @@ const DisplayTaskListDialog: React.FC<DisplayTaskListDialogProps> = ({
   handleEditTask,
   taskList,
 }: DisplayTaskListDialogProps) => {
+  const [isTaskDetailDialogOpen, setIsTaskDetailDialogOpen] =
+    React.useState(false);
+  const [selectedTask, setSelectedTask] = React.useState<Task | null>(null);
+
   const currentDate = selectedDayTasks?.date.toISOString().split('T')[0];
 
   const groupedTasks = {
@@ -55,18 +54,25 @@ const DisplayTaskListDialog: React.FC<DisplayTaskListDialogProps> = ({
     );
   };
 
+  const handleOpenTaskDetail = (task: Task) => {
+    setSelectedTask(task);
+    setIsTaskDetailDialogOpen(true);
+  };
+
   const TaskItem = ({ task }: { task: Task }) => (
     <div
-      className="p-3 rounded-lg border shadow-sm flex justify-between items-center"
+      className="p-3 rounded-lg border shadow-sm flex justify-between items-center cursor-pointer"
       style={{
         backgroundColor: '#F3F4F6',
         borderColor: '#E5E7EB',
       }}
+      onClick={() => handleOpenTaskDetail(task)}
     >
       <span className="text-gray-700">{task.content}</span>
       <div className="flex gap-2">
         <button
-          onClick={() => {
+          onClick={(e) => {
+            e.stopPropagation();
             setIsTaskListDialogOpen(false);
             handleEditTask(task);
           }}
@@ -75,10 +81,13 @@ const DisplayTaskListDialog: React.FC<DisplayTaskListDialogProps> = ({
           <AiOutlineEdit className="h-4 w-4" />
         </button>
         <button
-          onClick={() => handleDeleteTask(task.id)}
+          onClick={(e) => {
+            e.stopPropagation();
+            handleDeleteTask(task.id);
+          }}
           className="hover:text-red-600 p-1 rounded-md hover:bg-gray-100"
         >
-          <AiOutlineClose className="h-4 w-4" />
+          <AiOutlineDelete className="h-4 w-4" />
         </button>
       </div>
     </div>
@@ -105,34 +114,47 @@ const DisplayTaskListDialog: React.FC<DisplayTaskListDialogProps> = ({
     groupedTasks.done.length > 0;
 
   return (
-    <Dialog open={isTaskListDialogOpen} onOpenChange={setIsTaskListDialogOpen}>
-      <DialogContent className="bg-gray-50 border-0">
-        <DialogHeader className="flex flex-row items-center justify-between">
-          <DialogTitle className="text-gray-800">
-            {selectedDayTasks && formatDate(selectedDayTasks.date)}
-          </DialogTitle>
-          <button
-            onClick={() => setIsTaskListDialogOpen(false)}
-            className="p-2 hover:bg-gray-200 rounded-full transition-colors"
-          >
-            <AiOutlineClose className="h-5 w-5 text-gray-600" />
-          </button>
-        </DialogHeader>
-        <div className="space-y-4 mt-4">
-          {!hasAnyTasks ? (
-            <p className="text-gray-500 text-center py-4">
-              No tasks for this day
-            </p>
-          ) : (
-            <>
-              <TaskGroup title="Todo" tasks={groupedTasks.todo} />
-              <TaskGroup title="In Progress" tasks={groupedTasks.inProgress} />
-              <TaskGroup title="Done" tasks={groupedTasks.done} />
-            </>
-          )}
-        </div>
-      </DialogContent>
-    </Dialog>
+    <>
+      <Dialog
+        open={isTaskListDialogOpen}
+        onOpenChange={setIsTaskListDialogOpen}
+      >
+        <DialogContent className="bg-gray-50 border-0">
+          <DialogHeader className="flex flex-row items-center justify-between">
+            <DialogTitle className="text-gray-800">
+              {selectedDayTasks && formatDate(selectedDayTasks.date)}
+            </DialogTitle>
+            <button
+              onClick={() => setIsTaskListDialogOpen(false)}
+              className="p-2 hover:bg-gray-200 rounded-full transition-colors"
+            >
+              <AiOutlineClose className="h-5 w-5 text-gray-600" />
+            </button>
+          </DialogHeader>
+          <div className="space-y-4 mt-4">
+            {!hasAnyTasks ? (
+              <p className="text-gray-500 text-center py-4">
+                No tasks for this day
+              </p>
+            ) : (
+              <>
+                <TaskGroup title="Todo" tasks={groupedTasks.todo} />
+                <TaskGroup
+                  title="In Progress"
+                  tasks={groupedTasks.inProgress}
+                />
+                <TaskGroup title="Done" tasks={groupedTasks.done} />
+              </>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+      <DisplayTaskDetailsDialog
+        isOpen={isTaskDetailDialogOpen}
+        onClose={() => setIsTaskDetailDialogOpen(false)}
+        task={selectedTask}
+      />
+    </>
   );
 };
 
