@@ -1,7 +1,6 @@
 import React from 'react';
-import { AiOutlinePlus, AiOutlineClose, AiOutlineEdit } from 'react-icons/ai';
-import useTaskStore, { Task } from '@/lib/store/task-store';
-import { Button } from './ui/button';
+import { format, isToday } from 'date-fns';
+import { Task } from '@/types/task';
 
 interface DayProps {
   date: Date;
@@ -16,47 +15,40 @@ const DayCell: React.FC<DayProps> = ({
   date,
   tasks,
   isCurrentMonth,
-  onAddTask,
-  onEditTask,
   onDayClick,
 }) => {
-  const { deleteTask } = useTaskStore();
-  const formattedDate = date.toISOString().split('T')[0];
-  const isToday = new Date().toISOString().split('T')[0] === formattedDate;
+  const formattedDate = format(date, 'yyyy-MM-dd');
+  const isTodayDate = isToday(date);
+
+  const hasMultipleTasks = tasks.length > 1;
+  const firstTask = tasks.length > 0 ? tasks[0] : null;
+  const remainingTasksCount = tasks.length - 1;
+
+  const taskText = remainingTasksCount === 1 ? 'task' : 'tasks';
 
   return (
     <div
-      className={`min-h-[120px] border-[0.5px] border-gray-200 p-2 transition-colors cursor-pointer ${
+      className={`min-h-[140px] border-[0.5px] border-gray-200 p-2 transition-colors cursor-pointer ${
         isCurrentMonth ? 'bg-gray-50 hover:bg-gray-100' : 'bg-gray-100'
-      }`}
+      } flex flex-col`}
       onClick={() => onDayClick(date, tasks)}
     >
       <div className="flex justify-between items-center">
         <span
           className={`${
-            isToday
+            isTodayDate
               ? 'bg-blue-500 text-white w-6 h-6 rounded-full flex items-center justify-center text-sm font-medium'
               : 'text-sm text-gray-600'
           }`}
         >
           {date.getDate()}
         </span>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 hover:bg-gray-200"
-          onClick={(e) => {
-            e.stopPropagation();
-            onAddTask(formattedDate);
-          }}
-        >
-          <AiOutlinePlus className="h-3 w-3 text-gray-600" />
-        </Button>
       </div>
-      <div className="mt-2 space-y-1">
-        {tasks.map((task) => (
+
+      <div className="mt-2 space-y-1 flex-grow">
+        {firstTask && (
           <div
-            key={task.id}
+            key={firstTask.id}
             className="text-xs p-1.5 rounded-md border shadow-sm 
                     flex justify-between items-center group hover:border-gray-300 transition-all"
             style={{
@@ -65,24 +57,24 @@ const DayCell: React.FC<DayProps> = ({
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            <span className="truncate text-gray-700">{task.content}</span>
-            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-              <button
-                onClick={() => onEditTask(task)}
-                className="hover:text-blue-600 p-1 rounded-md hover:bg-gray-100"
-              >
-                <AiOutlineEdit className="h-3 w-3" />
-              </button>
-              <button
-                onClick={() => deleteTask(task.id)}
-                className="hover:text-red-600 p-1 rounded-md hover:bg-gray-100"
-              >
-                <AiOutlineClose className="h-3 w-3" />
-              </button>
-            </div>
+            <span className="truncate text-gray-700">{firstTask.content}</span>
           </div>
-        ))}
+        )}
       </div>
+
+      {hasMultipleTasks && (
+        <div className="w-full text-right mt-auto">
+          <span
+            className="text-xs text-gray-500 bg-gray-200 px-2 py-1 rounded-full inline-block italic cursor-pointer transition-colors"
+            onClick={(e) => {
+              e.stopPropagation();
+              onDayClick(date, tasks);
+            }}
+          >
+            +{remainingTasksCount} more {taskText}
+          </span>
+        </div>
+      )}
     </div>
   );
 };

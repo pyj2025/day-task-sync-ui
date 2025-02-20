@@ -75,22 +75,6 @@ const Calendar: React.FC = () => {
     setIsDialogOpen(true);
   };
 
-  // const handleSaveTask = () => {
-  //   if (editingTask) {
-  //     editTask(editingTask.id, {
-  //       content: taskContent,
-  //     });
-  //   } else {
-  //     addTask({
-  //       content: taskContent,
-  //       start_date: selectedDate,
-  //     });
-  //   }
-  //   setIsDialogOpen(false);
-  //   setTaskContent('');
-  //   setEditingTask(null);
-  // };
-
   const handleDayClick = (date: Date, tasks: Task[]) => {
     setSelectedDayTasks({ date, tasks });
     setIsDisplayTaskListDialogOpen(true);
