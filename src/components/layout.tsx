@@ -1,4 +1,5 @@
 import React from 'react';
+import Image from 'next/image';
 import {
   Settings,
   LogOut,
@@ -45,8 +46,17 @@ export default function Layout({
         <div className="max-w-7xl mx-auto">
           <div className="flex h-16 items-center justify-between px-4">
             <div className="flex items-center space-x-8">
-              <div className="text-xl font-semibold text-blue-600">
-                Day Task Sync
+              <div className="flex items-center space-x-2">
+                <Image
+                  src="/images/logo.svg"
+                  alt="DayTaskSync Logo"
+                  width={32}
+                  height={32}
+                  className="h-8 w-8"
+                />
+                <div className="text-xl font-semibold text-blue-600">
+                  Day Task Sync
+                </div>
               </div>
               <nav className="flex space-x-6">
                 <button
