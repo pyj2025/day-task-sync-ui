@@ -7,6 +7,12 @@ import DisplayTaskDetailsDialog from './display-task-details-dialog';
 
 const formatDate = (date: Date) => format(date, 'EEEE, MMMM d, yyyy');
 
+const truncateText = (text: string, maxLength: number = 20) => {
+  if (text.length <= maxLength) return text;
+
+  return `${text.substring(0, maxLength)}...`;
+};
+
 type SelectedDayTasks = {
   date: Date;
   tasks: Task[];
@@ -68,7 +74,7 @@ const DisplayTaskListDialog: React.FC<DisplayTaskListDialogProps> = ({
       }}
       onClick={() => handleOpenTaskDetail(task)}
     >
-      <span className="text-gray-700">{task.content}</span>
+      <span className="text-gray-700">{truncateText(task.content, 30)}</span>
       <div className="flex gap-2">
         <button
           onClick={(e) => {
