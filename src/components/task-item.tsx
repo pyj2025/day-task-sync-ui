@@ -6,6 +6,12 @@ import { Task } from '@/types/task';
 import { Button } from '@/components/ui/button';
 import { TaskItemTypes } from '@/lib/constants';
 
+const truncateText = (text: string, maxLength: number = 20) => {
+  if (text.length <= maxLength) return text;
+
+  return `${text.substring(0, maxLength)}...`;
+};
+
 interface TaskItemProps {
   task: Task;
   index: number;
@@ -71,7 +77,9 @@ const TaskItem: React.FC<TaskItemProps> = ({
     >
       <div className="flex flex-col gap-0.5">
         <div className="flex justify-between items-start">
-          <p className="text-lg font-medium text-gray-800">{task.content}</p>
+          <p className="text-lg font-medium text-gray-800 cursor-pointer">
+            {truncateText(task.content)}
+          </p>
           <div className="flex gap-2 ml-2">
             <Button
               variant="ghost"
