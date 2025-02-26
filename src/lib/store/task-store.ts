@@ -11,12 +11,6 @@ interface TaskStore extends UserState {
   };
   fetchTasks: () => Promise<void>;
   addTask: (task: Task) => void;
-  // moveTask: (
-  //   taskId: string,
-  //   sourceList: keyof TaskList,
-  //   targetList: keyof TaskList
-  // ) => void;
-  // showMoreTasks: (listName: keyof TaskList) => void;
   updateTask: (updatedTask: Task) => void;
   deleteTask: (taskId: string) => void;
   getTasksByDate: (date: string) => Task[];
@@ -38,7 +32,10 @@ const useTaskStore = create<TaskStore>()(
         done: 7,
       },
       fetchTasks: async () => {
-        const { data, error } = await supabase.from('TasksList').select('*');
+        const { data, error } = await supabase
+          .from('TasksList')
+          .select('*')
+          .eq('user_id', get().userId);
 
         if (error) {
           console.error('Failed to fetchTasks:', error);
@@ -89,38 +86,6 @@ const useTaskStore = create<TaskStore>()(
 
         get().fetchTasks();
       },
-      // moveTask: (
-      //   taskId: string,
-      //   sourceList: keyof TaskList,
-      //   targetList: keyof TaskList
-      // ) =>
-      //   set((state) => {
-      //     const sourceTasks = [...state.tasks[sourceList]];
-      //     const targetTasks = [...state.tasks[targetList]];
-
-      //     const taskToMove = sourceTasks.find((task) => task.id === taskId);
-      //     if (!taskToMove) return state;
-
-      //     const updatedTask = { ...taskToMove };
-      //     if (targetList === 'done') {
-      //       updatedTask.end_date = new Date().toISOString().split('T')[0];
-      //     }
-
-      //     return {
-      //       tasks: {
-      //         ...state.tasks,
-      //         [sourceList]: sourceTasks.filter((task) => task.id !== taskId),
-      //         [targetList]: [...targetTasks, updatedTask],
-      //       },
-      //     };
-      //   }),
-      // showMoreTasks: (listName: keyof TaskList) =>
-      //   set((state) => ({
-      //     visibleTasks: {
-      //       ...state.visibleTasks,
-      //       [listName]: state.visibleTasks[listName] + 7,
-      //     },
-      //   })),
       updateTask: async (updatedTask) => {
         const { id, ...rest } = updatedTask;
 
