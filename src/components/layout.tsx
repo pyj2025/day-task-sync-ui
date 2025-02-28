@@ -17,28 +17,30 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Toaster } from '@/components/ui/sonner';
+import useTaskStore from '@/lib/store/task-store';
 
 interface LayoutProps {
   children: React.ReactNode;
-  user: any;
   activeComponent: string;
   onComponentChange: (component: string) => void;
 }
 
 export default function Layout({
   children,
-  user,
   activeComponent,
   onComponentChange,
 }: LayoutProps) {
   const router = useRouter();
+  const { userId, setUserId } = useTaskStore();
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
+    setUserId(null);
+
     router.push('/login');
   };
 
-  if (!user) return <>{children}</>;
+  if (!userId) return <>{children}</>;
 
   return (
     <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
@@ -105,15 +107,6 @@ export default function Layout({
                 align="end"
                 className="w-56 mt-2 bg-white/60 backdrop-blur-lg border border-gray-100 shadow-lg rounded-lg"
               >
-                <DropdownMenuItem className="py-2 focus:bg-transparent">
-                  <div className="flex flex-col">
-                    <p className="text-sm font-medium text-gray-900">
-                      {user?.email}
-                    </p>
-                    <p className="text-xs text-gray-500">Account settings</p>
-                  </div>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator className="bg-gray-200" />
                 <DropdownMenuItem
                   onClick={handleLogout}
                   className="py-2 text-red-600 focus:text-red-600 focus:bg-red-50 cursor-pointer"
