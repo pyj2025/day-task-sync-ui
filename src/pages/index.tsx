@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
-import { useAuth } from '@/hooks/useAuth';
+import useTaskStore from '@/lib/store/task-store';
 import Login from '@/components/login';
 import Calendar from '@/components/calendar';
 import Board from '@/components/board';
@@ -11,7 +11,7 @@ interface HomeProps {
 }
 
 export default function Home({ activeComponent }: HomeProps) {
-  const { user } = useAuth();
+  const { userId } = useTaskStore();
   const router = useRouter();
 
   useEffect(() => {
@@ -29,7 +29,7 @@ export default function Home({ activeComponent }: HomeProps) {
     checkUser();
   }, [router]);
 
-  if (!user) {
+  if (!userId) {
     return <Login />;
   }
 
